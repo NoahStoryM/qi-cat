@@ -10,7 +10,6 @@
          ≂ ≂?
          procedure-coarity
          procedure-result-coarity
-         ->N:
          >>> <<<
          values->list
          list->values
@@ -19,10 +18,8 @@
                     ~>
                     ==+ >-
                     >>> <<<
-                    <>))
-
-(define id (procedure-reduce-arity values 1))
-(define bool->1+1 (->N: true? false?))
+                    <>
+                    =<))
 
 
 (define-qi-syntax-rule (~> flo ...)
@@ -36,12 +33,20 @@
   (esc (make-coproducting (☯ flo) ...)))
 
 
-(define-qi-syntax-rule (<<< args ...)
-  (esc (<<< args ...)))
+(define-qi-syntax-rule (<<< args)
+  (esc (<<< args)))
 
-(define-qi-syntax-rule (>>> args ...)
-  (esc (>>> args ...)))
+(define-qi-syntax-rule (>>> args)
+  (esc (>>> args)))
 
 
 (define-qi-syntax-rule (<> flo)
   (esc (coamp (☯ flo))))
+
+
+(define-qi-syntax-rule (=< flo ...)
+  (esc (->N: (☯ flo) ...)))
+
+
+(define id (procedure-reduce-arity values 1))
+(define bool->1+1 (☯ (~> (=< true? false?))))

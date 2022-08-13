@@ -93,10 +93,10 @@
              [(number? arg) 'number]
              [(string? arg) 'string]))
 
-         (☯                                ;     num ∪ str
-          (~> (esc (->N: number? string?)) ;       1 + 1
-              (==+ 'number 'string)        ; 'number + 'string
-              (>- _ _)))                   ; 'number ∪ 'string
+         (☯                             ;     num ∪ str
+          (~> (=< number? string?)      ;       1 + 1
+              (==+ 'number 'string)     ; 'number + 'string
+              (>- _ _)))                ; 'number ∪ 'string
          ))])
   (check-equal? (t 123) 'number)
   (check-equal? (t "0") 'string))
@@ -110,11 +110,11 @@
              [(number? arg) (- arg)]
              [(string? arg) (string-append "-" arg)]))
 
-         (☯                                       ; num ∪ str
-          (~> (-< (esc (->N: number? string?)) _) ;   (1 + 1)   × (num ∪ str)
-              (<<< 1)                             ; num + str
-              (==+ - (string-append "-" _))       ; num + str
-              (>- _ _)))                          ; num ∪ str
+         (☯                                 ; num ∪ str
+          (~> (-< (=< number? string?) _)   ;   (1 + 1)   × (num ∪ str)
+              (<<< 1)                       ; num + str
+              (==+ - (string-append "-" _)) ; num + str
+              (>- _ _)))                    ; num ∪ str
          ))])
   (check-equal? (t 123) -123)
   (check-equal? (t "0") "-0"))
@@ -129,7 +129,7 @@
              [(>  arg1 arg2) arg2]))
 
          (☯                             ;        real × real
-          (~> (-< (esc (->N: <= >)) _)  ; (1 + 1) × real × real
+          (~> (-< (=< <= >) _)          ; (1 + 1) × real × real
               (<<< 1)                   ; real × real + real × real
               (==+ 1> 2>)               ;        real + real
               (>- _ _)))                ;        real ∪ real
