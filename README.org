@@ -1,6 +1,7 @@
 #+TITLE: qi+
 * Table of Contents                                         :TOC_4_gh:noexport:
 - [[#qi][qi+]]
+- [[#category-theory-connections][Category Theory Connections]]
 
 * qi+
   qi with covalues.
@@ -8,3 +9,17 @@
   #+begin_src racket
     (require qi+)
   #+end_src
+
+* Category Theory Connections
+  |-----------------------+---------------------|
+  | Qi                    | Category Theory     |
+  |-----------------------+---------------------|
+  | (~> f g)              | g∘f                 |
+  | (==* f g) / (==+ f g) | f×g       / f+g    |
+  | (-< f g)  / (>- f g)  | <f,g>      / <f¦g>  |
+  | △        / ◁         | *->product / *->sum |
+  | ▽         / ▷         | product->* / sum->* |
+  | ⏚         / ≂         | *->1       / 0->*   |
+  | n>        / n<        | proj_n      / inj_n   |
+  | ><        / <>        |                     |
+  |-----------------------+---------------------|
