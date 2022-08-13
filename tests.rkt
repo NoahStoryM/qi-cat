@@ -110,16 +110,35 @@
              [(number? arg) (- arg)]
              [(string? arg) (string-append "-" arg)]))
 
-         (☯                                        ; num ∪ str
-          (~> (-< _ _)                             ; (num ∪ str) × (num ∪ str)
-              (==* (esc (->N: number? string?)) _) ;   (1 + 1)   × (num ∪ str)
-              (<<< 1)                              ; num + str
-              (==+ - (string-append "-" _))        ; num + str
-              (>- _ _)))                           ; num ∪ str
+         (☯                                       ; num ∪ str
+          (~> (-< (esc (->N: number? string?)) _) ;   (1 + 1)   × (num ∪ str)
+              (<<< 1)                             ; num + str
+              (==+ - (string-append "-" _))       ; num + str
+              (>- _ _)))                          ; num ∪ str
          ))])
   (check-equal? (t 123) -123)
   (check-equal? (t "0") "-0"))
 
 
+(for ([min
+       (in-list
+        (list
+         (λ (arg1 arg2)
+           (cond
+             [(<= arg1 arg2) arg1]
+             [(>  arg1 arg2) arg2]))
+
+         (☯                             ;        real × real
+          (~> (-< (esc (->N: <= >)) _)  ; (1 + 1) × real × real
+              (<<< 1)                   ; real × real + real × real
+              (==+ 1> 2>)               ;        real + real
+              (>- _ _)))                ;        real ∪ real
+         ))])
+  (check-equal? (min  123  123)  123)
+  (check-equal? (min -123  123) -123)
+  (check-equal? (min  123 -123) -123))
+
+
 (for ([i (in-list '(1 2 3 4))])
+  (check-equal? (~> (i) (n< i) ▷ car) (sub1 i))
   (check-equal? (~> (i) (n< i) ▷ cdr (_)) i))

@@ -263,14 +263,10 @@ A
 ;; disjoint union -> tag union
 (struct ->N (preds)
   #:property prop:procedure
-  (λ (self arg)
+  (λ (self . args)
     (define preds (->N-preds self))
-    (define n (index-where preds (λ (pred) (pred arg))))
-    (covalues
-     (match arg
-       [(covalues tag thk) (+ tag n)]
-       [_ n])
-     (λ () (values)))))
+    (define n (index-where preds (λ (pred) (apply pred args))))
+    (covalues n (λ () (values)))))
 (define ->N: (λ preds (if (null? preds) ≂ (->N preds))))
 
 ;; tag union -> disjoint union
