@@ -83,3 +83,43 @@
   (check-equal? (*and* #t #f) #f)
   (check-equal? (*and* #f #t) #f)
   (check-equal? (*and* #f #f) #f))
+
+
+(for ([t
+       (in-list
+        (list
+         (λ (arg)
+           (cond
+             [(number? arg) 'number]
+             [(string? arg) 'string]))
+
+         (☯                                ;     num ∪ str
+          (~> (esc (->N: number? string?)) ;       1 + 1
+              (==+ 'number 'string)        ; 'number + 'string
+              (>- _ _)))                   ; 'number ∪ 'string
+         ))])
+  (check-equal? (t 123) 'number)
+  (check-equal? (t "0") 'string))
+
+
+(for ([t
+       (in-list
+        (list
+         (λ (arg)
+           (cond
+             [(number? arg) (- arg)]
+             [(string? arg) (string-append "-" arg)]))
+
+         (☯                                        ; num ∪ str
+          (~> (-< _ _)                             ; (num ∪ str) × (num ∪ str)
+              (==* (esc (->N: number? string?)) _) ;   (1 + 1)   × (num ∪ str)
+              (<<< 1)                              ; num + str
+              (==+ - (string-append "-" _))        ; num + str
+              (>- _ _)))                           ; num ∪ str
+         ))])
+  (check-equal? (t 123) -123)
+  (check-equal? (t "0") "-0"))
+
+
+(for ([i (in-list '(1 2 3 4))])
+  (check-equal? (~> (i) (n< i) ▷ cdr (_)) i))
