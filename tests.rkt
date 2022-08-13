@@ -26,8 +26,8 @@
 (for ([f
        (in-list
         (list
-         (☯                               ; 1 + 1 + 1 + 1
-          (~> (==+ (>- #t #f) (>- #t #f)) ; B + B
+         (☯                               ;   1 + 1 + 1 + 1
+          (~> (==+ (>- #t #f) (>- #t #f)) ;       B + B
               (==+ (-< #t id) (-< #f id)) ; (t × B) + (f × B)
               (>- _ _)))                  ; (t × B) ∪ (f × B) = B × B
 
@@ -51,25 +51,25 @@
 (for ([¬f
        (in-list
         (list
-         (☯                               ; B × B
+         (☯                               ;       B × B
           (~> (==* bool->1+1 id)          ; (1 + 1) × B
-              (<<< 1)                     ; B + B
-              (==+ bool->1+1 bool->1+1))) ; 1 + 1 + 1 + 1
+              (<<< 1)                     ;       B + B
+              (==+ bool->1+1 bool->1+1))) ;   1 + 1 + 1 + 1
 
-         (☯                             ; B × B
+         (☯                             ;       B × B
           (~> (==* bool->1+1 bool->1+1) ; (1 + 1) × (1 + 1)
               (<<< 1)                   ; (1 + 1) + (1 + 1)
-              (==+ 1< 2<)))             ; 1 + 1 + 1 + 1
+              (==+ 1< 2<)))             ;   1 + 1 + 1 + 1
 
-         (☯                             ; B × B
+         (☯                             ;       B × B
           (~> (==* bool->1+1 bool->1+1) ; (1 + 1) × (1 + 1)
               (<<< 1)                   ; (1 + 1) + (1 + 1)
-              (==+ (==+ _ ≂) _)))       ; 1 + 1 + 1 + 1
+              (==+ (==+ _ ≂) _)))       ;   1 + 1 + 1 + 1
 
-         (☯                             ; B × B
+         (☯                             ;       B × B
           (~> (==* bool->1+1 bool->1+1) ; (1 + 1) × (1 + 1)
               (<<< 1)                   ; (1 + 1) + (1 + 1)
-              (<> (==+ _ ≂))))          ; 1 + 1 + 1 + 1
+              (<> (==+ _ ≂))))          ;   1 + 1 + 1 + 1
          ))])
 
   (define *n* (☯ (~> ¬f (>- 1 2 3 4))))
@@ -110,11 +110,11 @@
              [(number? arg) (- arg)]
              [(string? arg) (string-append "-" arg)]))
 
-         (☯                                 ; num ∪ str
-          (~> (-< (=< number? string?) _)   ;   (1 + 1)   × (num ∪ str)
-              (<<< 1)                       ; num + str
-              (==+ - (string-append "-" _)) ; num + str
-              (>- _ _)))                    ; num ∪ str
+         (☯                                 ;     num ∪ str
+          (~> (-< (=< number? string?) _)   ; (1 + 1) × (num ∪ str)
+              (<<< 1)                       ;     num + str
+              (==+ - (string-append "-" _)) ;     num + str
+              (>- _ _)))                    ;     num ∪ str
          ))])
   (check-equal? (t 123) -123)
   (check-equal? (t "0") "-0"))
@@ -128,11 +128,11 @@
              [(<= arg1 arg2) arg1]
              [(>  arg1 arg2) arg2]))
 
-         (☯                             ;        real × real
-          (~> (-< (=< <= >) _)          ; (1 + 1) × real × real
-              (<<< 1)                   ; real × real + real × real
-              (==+ 1> 2>)               ;        real + real
-              (>- _ _)))                ;        real ∪ real
+         (☯                             ;          real × real
+          (~> (-< (=< <= >) _)          ;       (1 + 1) × (real × real)
+              (<<< 1)                   ; (real × real) + (real × real)
+              (==+ 1> 2>)               ;          real + real
+              (>- _ _)))                ;          real ∪ real
          ))])
   (check-equal? (min  123  123)  123)
   (check-equal? (min -123  123) -123)
