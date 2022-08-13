@@ -22,7 +22,7 @@
                     <>))
 
 (define id (procedure-reduce-arity values 1))
-(define bool->1+1 (->N: #t #f))
+(define bool->1+1 (->N: true? false?))
 
 
 (define-qi-syntax-rule (~> flo ...)

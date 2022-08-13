@@ -11,6 +11,8 @@
 
 ;; utils
 (define (->boolean v) (not (not v)))
+(define (true?  arg) (eq? #t arg))
+(define (false? arg) (eq? #f arg))
 (define (list->values ls) (apply values ls))
 (define-syntax-parse-rule (values->list body:expr ...+)
   (call-with-values (λ () body ...) list))
@@ -253,23 +255,23 @@ A
          [(copairing? f)
           ;; f = <g | h> : X + Y + Z -> (A + B) ∪ (C + 0)
           (apply max 0 result-coarity*)])]
-      [(->N? f) (length (->N-args f))]
+      [(->N? f) (length (->N-preds f))]
       [(composed? f) (composed-result-coarity f)]
       [else 1])))
 
 
 ;; disjoint union -> tag union
-(struct ->N (args)
+(struct ->N (preds)
   #:property prop:procedure
-  (λ (self arg [is-equal? equal?])
-    (define args (->N-args self))
-    (define n (index-of args arg is-equal?))
+  (λ (self arg)
+    (define preds (->N-preds self))
+    (define n (index-where preds (λ (pred) (pred arg))))
     (covalues
      (match arg
        [(covalues tag thk) (+ tag n)]
        [_ n])
      (λ () (values)))))
-(define ->N: (λ args (if (null? args) ≂ (->N args))))
+(define ->N: (λ preds (if (null? preds) ≂ (->N preds))))
 
 ;; tag union -> disjoint union
 #;(begin
