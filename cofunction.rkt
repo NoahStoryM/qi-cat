@@ -327,3 +327,5 @@ A
           (covalues (* m tag1) thk)])]
       [vals (apply f vals)])))
 (define coamp <>)
+
+(define fanin (λ (n) (apply make-copairing (make-list n values))))

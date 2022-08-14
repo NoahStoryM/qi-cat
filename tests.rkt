@@ -35,6 +35,11 @@
           (~> (==+ (~> (>- #t #f) (-< #t id))
                    (~> (>- #t #f) (-< #f id)))
               (>- _ _)))
+
+         (☯
+          (~> (==+ (~> (>- #t #f) (-< #t id))
+                   (~> (>- #t #f) (-< #f id)))
+              (fanin 2)))
          ))])
 
   (check-equal? (values->list (~> () 1< f)) '(#t #t))
@@ -96,7 +101,7 @@
          (☯                             ;     num ∪ str
           (~> (=< number? string?)      ;       1 + 1
               (==+ 'number 'string)     ; 'number + 'string
-              (>- _ _)))                ; 'number ∪ 'string
+              (fanin 2)))               ; 'number ∪ 'string
          ))])
   (check-equal? (t 123) 'number)
   (check-equal? (t "0") 'string))
@@ -114,7 +119,7 @@
           (~> (-< (=< number? string?) _)   ; (1 + 1) × (num ∪ str)
               (<<< 1)                       ;     num + str
               (==+ - (string-append "-" _)) ;     num + str
-              (>- _ _)))                    ;     num ∪ str
+              (fanin 2)))                   ;     num ∪ str
          ))])
   (check-equal? (t 123) -123)
   (check-equal? (t "0") "-0"))
@@ -132,7 +137,7 @@
           (~> (-< (=< <= >) _)          ;       (1 + 1) × (real × real)
               (<<< 1)                   ; (real × real) + (real × real)
               (==+ 1> 2>)               ;          real + real
-              (>- _ _)))                ;          real ∪ real
+              (fanin 2)))               ;          real ∪ real
          ))])
   (check-equal? (min  123  123)  123)
   (check-equal? (min -123  123) -123)

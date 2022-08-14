@@ -2,6 +2,7 @@
 * Table of Contents                                         :TOC_4_gh:noexport:
 - [[#qi][qi+]]
 - [[#category-theory-connections][Category Theory Connections]]
+- [[#examples][Examples]]
 
 * qi+
   qi with covalues.
@@ -11,15 +12,98 @@
   #+end_src
 
 * Category Theory Connections
-  |-----------------------+---------------------|
-  | Qi                    | Category Theory     |
-  |-----------------------+---------------------|
-  | (~> f g)              | g∘f                 |
-  | (==* f g) / (==+ f g) | f×g       / f+g    |
-  | (-< f g)  / (>- f g)  | <f,g>      / <f¦g>  |
-  | △        / ◁         | *->product / *->sum |
-  | ▽         / ▷         | product->* / sum->* |
-  | ⏚         / ≂         | *->1       / 0->*   |
-  | n>        / n<        | proj_n      / inj_n   |
-  | ><        / <>        |                     |
-  |-----------------------+---------------------|
+  |-----------------------+---------------------------|
+  | Qi                    | Category Theory           |
+  |-----------------------+---------------------------|
+  | (~> f g)              | g∘f                       |
+  | (==* f g) / (==+ f g) | f×g        / f+g         |
+  | (-< f g)  / (>- f g)  | <f,g>       / <f¦g>       |
+  | △        / ◁         | *->product  / *->sum      |
+  | ▽         / ▷         | product->*  / sum->*      |
+  | ⏚         / ≂         | *->1        / 0->*        |
+  | n>        / n<        | proj_n       / inj_n        |
+  | fanout    / fanin     | <id,id,...> / <id¦id¦...> |
+  | ><        / <>        |                           |
+  |-----------------------+---------------------------|
+
+* Examples
+#+begin_src racket
+(define eval
+  (λ (exp env)
+    (cond
+      [(self-evaluating? exp) exp]
+      [(variable? exp) (lookup-variable-value exp env)]
+      [(quoted? exp) (text-of-quotation exp)]
+      [(assignment? exp) (eval-assignment exp env)]
+      [(definition? exp) (eval-definition exp env)]
+      [(if? exp) (eval-if exp env)]
+      [(lambda? exp)
+       (make-procedure
+        (lambda-parameters exp)
+        (lambda-body exp)
+        env)]
+      [(begin? exp) (eval-sequence (begin-actions exp) env)]
+      [(cond? exp) (eval (cond->if exp) env)]
+      [(application? exp)
+       (apply (eval (operator exp) env)
+         (list-of-values (operands exp) env))]
+      [else (error "Unknown expression type -- EVAL" exp)])))
+
+
+(define eval
+  (λ (exp env)
+    (switch (exp)
+      [self-evaluating? _]
+      [variable? (lookup-variable-value env)]
+      [quoted? text-of-quotation]
+      [assignment? (eval-assignment env)]
+      [definition? (eval-definition env)]
+      [if? (eval-if env)]
+      [lambda?
+       (~> (-< lambda-parameters
+               lambda-body)
+           (make-procedure env))]
+      [begin? (~> begin-actions (eval-sequence env))]
+      [cond? (~> cond->if (eval env))]
+      [application?
+       (~> (-< (~> operator (eval env))
+               (~> operands (list-of-values env)))
+           apply)]
+      [else (error "Unknown expression type -- EVAL" _)])))
+
+
+(define eval
+  (☯
+   (~> (==*
+        (-<
+         (=< self-evaluating?
+             variable?
+             quoted?
+             assignment?
+             definition?
+             if?
+             lambda?
+             begin?
+             cond?
+             application?
+             #t)
+         _)
+        _)
+       (<<< 1)
+       (==+
+        1>
+        lookup-variable-value
+        (~> 1> text-of-quotation)
+        eval-assignment
+        eval-definition
+        eval-if
+        (~> (==* (-< lambda-parameters lambda-body) _) make-procedure)
+        (~> (==* begin-actions _) eval-sequence)
+        (~> (==* cond->if _) eval)
+        (~> (-< (~> (==* operator _) eval)
+                (~> (==* operands _) list-of-values))
+            apply)
+        (~> 1> (error "Unknown expression type -- EVAL" _)))
+       (fanin 11))))
+
+#+end_src
