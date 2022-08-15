@@ -192,17 +192,17 @@ A
 (define (true?  arg) (eq? #t arg))
 (define (false? arg) (eq? #f arg))
 
-(define 1+1->bool (☯ (>- #t #f)))
-(define bool->1+1 (☯ (=< true? false?)))
+(define 1+1->bool (☯ (>- #f #t)))
+(define bool->1+1 (☯ (=< false? true?)))
 
-(~> (#t) bool->1+1 ▷ cdr)       ; 0
-(~> (#t) bool->1+1 ▷ car (_) ▽) ; '()
-
-(~> (#f) bool->1+1 ▷ cdr)       ; 1
+(~> (#f) bool->1+1 ▷ cdr)       ; 0
 (~> (#f) bool->1+1 ▷ car (_) ▽) ; '()
 
-(~> () 1< 1+1->bool) ; #t
-(~> () 2< 1+1->bool) ; #f
+(~> (#t) bool->1+1 ▷ cdr)       ; 1
+(~> (#t) bool->1+1 ▷ car (_) ▽) ; '()
+
+(~> () 1< 1+1->bool) ; #f
+(~> () 2< 1+1->bool) ; #t
 
 ;;; "a" ∪ "b" ∪ "c" is isomorphic to 1 + 1 + 1:
 (define 1+1+1->abc (☯ (>- "a" "b" "c")))
@@ -255,10 +255,10 @@ But if A is 1, it seems that the input should be tagged with 2:
        (<<< 1)                   ; (1 + 1) + (1 + 1)
        (<> (==+ _ ≂))            ;   1 + 1 + 1 + 1
        (>- #t #f #f #f))))       ;   t ∪ f ∪ f ∪ f
-(*and* #t #t) ; #t
-(*and* #t #f) ; #f
+(*and* #f #f) ; #t
 (*and* #f #t) ; #f
-(*and* #f #f) ; #f
+(*and* #t #f) ; #f
+(*and* #t #t) ; #f
 
 (define *or*
   (☯                             ;       B × B
@@ -266,10 +266,10 @@ But if A is 1, it seems that the input should be tagged with 2:
        (<<< 1)                   ; (1 + 1) + (1 + 1)
        (<> (==+ _ ≂))            ;   1 + 1 + 1 + 1
        (>- #t #t #t #f))))       ;   t ∪ t ∪ t ∪ f
-(*or* #t #t) ; #t
-(*or* #t #f) ; #t
+(*or* #f #f) ; #t
 (*or* #f #t) ; #t
-(*or* #f #f) ; #f
+(*or* #t #f) ; #t
+(*or* #t #t) ; #f
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

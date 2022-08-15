@@ -17,8 +17,8 @@
     (☯                                     ; str × (t ∪ f) = str × B
      (~> (==* id bool->1+1)                ; str × (1 + 1)
          ¬d                                ; str + str
-         (==+ string->symbol string->list) ; sym + lst
-         (>- _ _))))                       ; sym ∪ lst
+         (==+ string->list string->symbol) ; lst + sym
+         (>- _ _))))                       ; lst ∪ sym
   (check-equal? (values->list (string->symbol/list "hello" #t)) '(hello))
   (check-equal? (values->list (string->symbol/list "hello" #f)) '((#\h #\e #\l #\l #\o))))
 
@@ -78,16 +78,16 @@
          ))])
 
   (define *n* (☯ (~> ¬f (>- 1 2 3 4))))
-  (check-equal? (*n* #t #t) 1)
-  (check-equal? (*n* #t #f) 2)
-  (check-equal? (*n* #f #t) 3)
-  (check-equal? (*n* #f #f) 4)
+  (check-equal? (*n* #f #f) 1)
+  (check-equal? (*n* #f #t) 2)
+  (check-equal? (*n* #t #f) 3)
+  (check-equal? (*n* #t #t) 4)
 
   (define *and* (☯ (~> ¬f (>- #t #f #f #f))))
-  (check-equal? (*and* #t #t) #t)
-  (check-equal? (*and* #t #f) #f)
+  (check-equal? (*and* #f #f) #t)
   (check-equal? (*and* #f #t) #f)
-  (check-equal? (*and* #f #f) #f))
+  (check-equal? (*and* #t #f) #f)
+  (check-equal? (*and* #t #t) #f))
 
 
 (for ([t

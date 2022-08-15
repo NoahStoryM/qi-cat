@@ -50,4 +50,4 @@
 
 
 (define id (procedure-reduce-arity values 1))
-(define bool->1+1 (☯ (~> (=< true? false?))))
+(define bool->1+1 (☯ (~> (=< false? true?))))
