@@ -181,6 +181,10 @@ A
     (ε (~> ▷ car (_) ▽ displayln))) ; display (A B)
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 3. Conditional
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;;; 1 + 1 + ... + 1 (N) has n elements, so it's isomorphic to
 ;;; the types with n elements.
 
@@ -266,3 +270,32 @@ But if A is 1, it seems that the input should be tagged with 2:
 (*or* #t #f) ; #t
 (*or* #f #t) ; #t
 (*or* #f #f) ; #f
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 4. Iteration and Recursion
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;; It's common to define a local loop procedure for iteration.
+;;; For example:
+(define factorial
+  (λ (n)
+    (define loop
+      (λ (p m)
+        (cond
+          [(=  m 0) p]
+          [(>= m 1) (loop (* p m) (sub1 m))])))
+    (loop 1 n)))
+
+;;; With covalues, there is no need to define loop:
+(define-flow (factorial n) ; n + p × m + p
+  (>- (~>            ; n
+       (-< 1 _)      ; p × m  (p = 1, m = n)
+       2< factorial)
+      (~>                               ;   p × m
+       (==* _ (-< _ (=< (>= 1) (= 0)))) ;   p × m   × (1 + 1)
+       (<<< 3)                          ;   p × m   +  p × m
+       (==+ (-< * (~> 2> sub1)) 1>)     ; p*m × m-1 +  p
+       2< factorial)
+      _ ; p
+      ))
