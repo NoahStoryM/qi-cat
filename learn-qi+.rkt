@@ -79,14 +79,14 @@ For f : A -> X and g : B -> Y, there are
 (☯ (fanin  3)) ; (☯ (>- _ _ _))
 
 ;;; !!! WARNING !!!
-(procedure-coarity        (λ _ (apply (☯ (==+ add1 sub1)) _))) ; 1
-(procedure-result-coarity (λ _ (apply (☯ (==+ add1 sub1)) _))) ; 1
+(procedure-coarity        (π (_) (==+ add1 sub1))) ; 1
+(procedure-result-coarity (π (_) (==+ add1 sub1))) ; 1
 
-(~> (0) 1< (esc (λ _ (apply (☯ (==+ add1 sub1)) _))) ▷ cdr)     ;  0
-(~> (0) 1< (esc (λ _ (apply (☯ (==+ add1 sub1)) _))) ▷ car (_)) ;  1
+(~> (0) 1< (esc (π (_) (==+ add1 sub1))) ▷ cdr)     ;  0
+(~> (0) 1< (esc (π (_) (==+ add1 sub1))) ▷ car (_)) ;  1
 
-(~> (0) 2< (esc (λ _ (apply (☯ (==+ add1 sub1)) _))) ▷ cdr)     ;  1
-(~> (0) 2< (esc (λ _ (apply (☯ (==+ add1 sub1)) _))) ▷ car (_)) ; -1
+(~> (0) 2< (esc (π (_) (==+ add1 sub1))) ▷ cdr)     ;  1
+(~> (0) 2< (esc (π (_) (==+ add1 sub1))) ▷ car (_)) ; -1
 
 
 #|
