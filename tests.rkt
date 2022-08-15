@@ -147,3 +147,23 @@
 (for ([i (in-list '(1 2 3 4))])
   (check-equal? (~> (i) (n< i) ▷ cdr) (sub1 i))
   (check-equal? (~> (i) (n< i) ▷ car (_)) i))
+
+
+(for ([i (in-range 10)])
+  (define factorial-1
+    (λ (n)
+      (define loop
+        (λ (p m)
+          (cond
+            [(=  m 0) p]
+            [(>= m 1) (loop (* p m) (sub1 m))])))
+      (loop 1 n)))
+  (define-flow (factorial-2 n)  ; n + p × m + p
+    (>- (~> (-< 1 _) 2< factorial-2)
+        (~>                               ;   p × m
+         (==* _ (-< _ (=< (>= 1) (= 0)))) ;   p × m   × (1 + 1)
+         (<<< 3)                          ;   p × m   +  p × m
+         (==+ (-< * (~> 2> sub1)) 1>)     ; p*m × m-1 +  p
+         2< factorial-2)
+        _))
+  (check-equal? (factorial-1 i) (factorial-2 i)))
