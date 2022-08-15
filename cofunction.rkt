@@ -19,7 +19,7 @@
 
 
 ;; covalues
-(struct covalues (tag thk))
+(struct covalues (thk tag))
 (define covalues-vals (λ (covals) ((covalues-thk covals))))
 
 (define-values (n< 1< 2< 3< 4< 5< 6< 7< 8< 9<)
@@ -28,8 +28,8 @@
       (define m (sub1 n))
       (procedure-rename
        (match-lambda*
-         [(list (covalues tag thk)) (covalues (+ tag m) thk)]
-         [vals (covalues m (λ () (list->values vals)))])
+         [(list (covalues thk tag)) (covalues thk (+ tag m))]
+         [vals (covalues (λ () (list->values vals)) m)])
        (string->symbol (format "~a<" n))))
     (values
      (λ (n)
@@ -62,10 +62,10 @@ A
 
 #;(begin
     (define make-covalues
-      (λ (tag thk)
+      (λ (thk tag)
         (if (= 0 tag)
             (thk)
-            (covalues tag thk))))
+            (covalues thk tag))))
     (define get-covalues-tag
       (λ (obj)
         (if (covalues? obj)
@@ -80,16 +80,16 @@ A
 
 (define ◁
   (match-lambda
-    [(cons (? natural? tag) (? procedure? thk))
+    [(cons (? procedure? thk) (? natural? tag))
      #:when (zero? (procedure-arity thk))
-     (covalues tag thk)]
+     (covalues thk tag)]
     #;[(? procedure? thk)
        #:when (zero? (procedure-arity thk))
-       (covalues 0 thk)]))
+       (covalues thk 0)]))
 (define ▷
   (match-lambda
-    [(covalues tag thk) (cons tag thk)]
-    #;[thk (cons 0 thk)]))
+    [(covalues thk tag) (cons thk tag)]
+    #;[thk (cons thk 0)]))
 
 
 ;; composed
@@ -124,10 +124,10 @@ A
   (λ (self . args)
     (define f* (coprocedure-f* self))
     (when (null? f*) (error '≂ "Can't call ≂"))
-    (define-values (coarity thk)
+    (define-values (thk coarity)
       (match args
-        [(list (covalues tag thk)) (values (add1 tag) thk)]
-        [_ (values 1 (λ () (list->values args)))]))
+        [(list (covalues thk tag)) (values thk (add1 tag))]
+        [_ (values (λ () (list->values args)) 1)]))
     (let loop ([coarity coarity] [tag1 0] [f* f*])
       (when (null? f*) (error 'call "tag out of bound"))
       (define f (car f*))
@@ -142,20 +142,20 @@ A
                  (call-with-values
                   (if (= n 1)
                       thk
-                      (λ () (covalues (sub1 coarity) thk)))
+                      (λ () (covalues thk (sub1 coarity))))
                   f))
-           [(list (covalues tag thk)) (covalues (+ tag tag1) thk)]
-           [vals (covalues tag1 (λ () (list->values vals)))])]))))
+           [(list (covalues thk tag)) (covalues thk (+ tag tag1))]
+           [vals (covalues (λ () (list->values vals)) tag1)])]))))
 
 (struct copairing coprocedure ()
   #:property prop:procedure
   (λ (self . args)
     (define f* (coprocedure-f* self))
     (when (null? f*) (error '≂ "Can't call ≂"))
-    (define-values (coarity thk)
+    (define-values (thk coarity)
       (match args
-        [(list (covalues tag thk)) (values (add1 tag) thk)]
-        [_ (values 1 (λ () (list->values args)))]))
+        [(list (covalues thk tag)) (values thk (add1 tag))]
+        [_ (values (λ () (list->values args)) 1)]))
     (let loop ([coarity coarity] [f* f*])
       (when (null? f*) (error 'call "tag out of bound"))
       (define f (car f*))
@@ -167,7 +167,7 @@ A
          (call-with-values
           (if (= n 1)
               thk
-              (λ () (covalues (sub1 coarity) thk)))
+              (λ () (covalues thk (sub1 coarity))))
           f)]))))
 
 
@@ -266,7 +266,7 @@ A
   (λ (self . args)
     (define preds (->N-preds self))
     (define n (index-where preds (λ (pred) (apply pred args))))
-    (covalues n (λ () (values)))))
+    (covalues (λ () (values)) n)))
 (define ->N: (λ preds (if (null? preds) ≂ (->N preds))))
 
 ;; tag union -> disjoint union
@@ -281,7 +281,7 @@ A
 (define >>>
   (λ (coarity)
     (match-lambda
-      [(covalues tag thk)
+      [(covalues thk tag)
        (call-with-values
         thk
         (λ args
@@ -290,23 +290,23 @@ A
             args
             (sub1 coarity)
             (match-lambda
-              #;[(covalues tag0 thk)
-                 (covalues (+ tag tag0) thk)]
-              [arg (covalues tag (λ () arg))])))))])))
+              #;[(covalues thk tag0)
+                 (covalues thk (+ tag tag0))]
+              [arg (covalues (λ () arg) tag)])))))])))
 (define <<<
   (λ (coarity)
     (λ args
       (define-values (head tail)
         (split-at args (sub1 coarity)))
       (match (car tail)
-        [(covalues tag thk)
+        [(covalues thk tag)
          (call-with-values
           thk
           (λ args
             (match (append head args (cdr tail))
-              #;[(list (covalues tag0 thk))
-                 (covalues (+ tag tag0) thk)]
-              [vals (covalues tag (λ () (list->values vals)))])))]))))
+              #;[(list (covalues thk tag0))
+                 (covalues thk (+ tag tag0))]
+              [vals (covalues (λ () (list->values vals)) tag)])))]))))
 
 
 ;; higher-order
@@ -315,16 +315,16 @@ A
     (define n (procedure-coarity f))
     (define m (procedure-result-coarity f))
     (match-lambda*
-      [(list (covalues tag thk))
+      [(list (covalues thk tag))
        (define-values (coa1 coa0)
          (quotient/remainder (add1 tag) n))
        (define-values (tag1 tag0)
          (values (sub1 coa1) (sub1 coa0)))
-       (match (values->list (apply f (list (covalues tag0 thk))))
-         [(list (covalues tag thk))
-          (covalues (+ (* m tag1) tag) thk)]
+       (match (values->list (apply f (list (covalues thk tag0))))
+         [(list (covalues thk tag))
+          (covalues thk (+ (* m tag1) tag))]
          [vals
-          (covalues (* m tag1) thk)])]
+          (covalues thk (* m tag1))])]
       [vals (apply f vals)])))
 (define coamp <>)
 

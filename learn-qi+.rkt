@@ -17,22 +17,22 @@ Covalues is just the Values tagged with natural numbers.
 (~> (123) 3<) ; #<covalues>
 
 ;;; ◁ and ▷
-(~> (123) 1< ▷ car)     ; 0
-(~> (123) 1< ▷ cdr (_)) ; 123
+(~> (123) 1< ▷ cdr)     ; 0
+(~> (123) 1< ▷ car (_)) ; 123
 
-(~> (123) 2< ▷ car)     ; 1
-(~> (123) 2< ▷ cdr (_)) ; 123
+(~> (123) 2< ▷ cdr)     ; 1
+(~> (123) 2< ▷ car (_)) ; 123
 
-(~> (123) 3< ▷ car)     ; 2
-(~> (123) 3< ▷ cdr (_)) ; 123
+(~> (123) 3< ▷ cdr)     ; 2
+(~> (123) 3< ▷ car (_)) ; 123
 
-(~> ((cons 0 (λ () 123))) ◁) ; #<covalues>
-(~> ((cons 1 (λ () 123))) ◁) ; #<covalues>
-(~> ((cons 2 (λ () 123))) ◁) ; #<covalues>
+(~> ((cons (λ () 123) 0)) ◁) ; #<covalues>
+(~> ((cons (λ () 123) 1)) ◁) ; #<covalues>
+(~> ((cons (λ () 123) 2)) ◁) ; #<covalues>
 
-(~> (123) 1< 5< ▷ car) ; 4 = (1 - 1) + (5 - 1)
-(~> (123) 2< 5< ▷ car) ; 5 = (2 - 1) + (5 - 1)
-(~> (123) 3< 5< ▷ car) ; 6 = (3 - 1) + (5 - 1)
+(~> (123) 1< 5< ▷ cdr) ; 4 = (1 - 1) + (5 - 1)
+(~> (123) 2< 5< ▷ cdr) ; 5 = (2 - 1) + (5 - 1)
+(~> (123) 3< 5< ▷ cdr) ; 6 = (3 - 1) + (5 - 1)
 
 #|
 Procedures can be regarded as the morphisms between Covalues.
@@ -66,11 +66,11 @@ For f : A -> X and g : B -> Y, there are
 (procedure-coarity        (☯ (>-  add1 sub1))) ; 2
 (procedure-result-coarity (☯ (>-  add1 sub1))) ; 1
 
-(~> (0) 1< (==+ add1 sub1) ▷ car)     ;  0
-(~> (0) 1< (==+ add1 sub1) ▷ cdr (_)) ;  1
+(~> (0) 1< (==+ add1 sub1) ▷ cdr)     ;  0
+(~> (0) 1< (==+ add1 sub1) ▷ car (_)) ;  1
 
-(~> (0) 2< (==+ add1 sub1) ▷ car)     ;  1
-(~> (0) 2< (==+ add1 sub1) ▷ cdr (_)) ; -1
+(~> (0) 2< (==+ add1 sub1) ▷ cdr)     ;  1
+(~> (0) 2< (==+ add1 sub1) ▷ car (_)) ; -1
 
 (~> (0) 1< (>-  add1 sub1))           ;  1
 (~> (0) 2< (>-  add1 sub1))           ; -1
@@ -82,11 +82,11 @@ For f : A -> X and g : B -> Y, there are
 (procedure-coarity        (λ _ (apply (☯ (==+ add1 sub1)) _))) ; 1
 (procedure-result-coarity (λ _ (apply (☯ (==+ add1 sub1)) _))) ; 1
 
-(~> (0) 1< (esc (λ _ (apply (☯ (==+ add1 sub1)) _))) ▷ car)     ;  0
-(~> (0) 1< (esc (λ _ (apply (☯ (==+ add1 sub1)) _))) ▷ cdr (_)) ;  1
+(~> (0) 1< (esc (λ _ (apply (☯ (==+ add1 sub1)) _))) ▷ cdr)     ;  0
+(~> (0) 1< (esc (λ _ (apply (☯ (==+ add1 sub1)) _))) ▷ car (_)) ;  1
 
-(~> (0) 2< (esc (λ _ (apply (☯ (==+ add1 sub1)) _))) ▷ car)     ;  1
-(~> (0) 2< (esc (λ _ (apply (☯ (==+ add1 sub1)) _))) ▷ cdr (_)) ; -1
+(~> (0) 2< (esc (λ _ (apply (☯ (==+ add1 sub1)) _))) ▷ cdr)     ;  1
+(~> (0) 2< (esc (λ _ (apply (☯ (==+ add1 sub1)) _))) ▷ car (_)) ; -1
 
 
 #|
@@ -125,13 +125,13 @@ A
 ;; (==+ ≂ _ ≂) : (B -> A+B+C) = (0+B+0 -> A+B+C)
 ;; (==+ ≂ ≂ _) : (C -> A+B+C) = (0+0+C -> A+B+C)
 
-(~> (123) 1< ▷ car) ; 0
-(~> (123) 2< ▷ car) ; 1
-(~> (123) 3< ▷ car) ; 2
+(~> (123) 1< ▷ cdr) ; 0
+(~> (123) 2< ▷ cdr) ; 1
+(~> (123) 3< ▷ cdr) ; 2
 
-(~> (123) (==+ _ ≂ ≂) ▷ car) ; 0
-(~> (123) (==+ ≂ _ ≂) ▷ car) ; 1
-(~> (123) (==+ ≂ ≂ _) ▷ car) ; 2
+(~> (123) (==+ _ ≂ ≂) ▷ cdr) ; 0
+(~> (123) (==+ ≂ _ ≂) ▷ cdr) ; 1
+(~> (123) (==+ ≂ ≂ _) ▷ cdr) ; 2
 
 
 ;;; Differences
@@ -160,25 +160,25 @@ A
 (~> ("A" "B") ; "A" × "B"
     (==+ _ ≂) ; ("A" × "B") + ("A" × "C")
     (ε (~> displayln))             ; display #<covalues>
-    (ε (~> ▷ car displayln))       ; display 0
-    (ε (~> ▷ cdr (_) ▽ displayln)) ; display (A B)
+    (ε (~> ▷ cdr displayln))       ; display 0
+    (ε (~> ▷ car (_) ▽ displayln)) ; display (A B)
     d         ; "A" × ("B" + "C")
     (ε (~> 1> displayln))              ; display A
     (ε (~> 2> displayln))              ; display #<covalues>
-    (ε (~> 2> ▷ car displayln))        ; display 0
-    (ε (~> 2> ▷ cdr (_) ▽ displayln))) ; display (B)
+    (ε (~> 2> ▷ cdr displayln))        ; display 0
+    (ε (~> 2> ▷ car (_) ▽ displayln))) ; display (B)
 
 (~> ("A" "B") (==* _ 1<) ¬d)
 (~> ("A" "B")         ; "A" × "B"
     (==* _ (==+ _ ≂)) ; "A" × ("B" + "C")
     (ε (~> 1> displayln))             ; display A
     (ε (~> 2> displayln))             ; display #<covalues>
-    (ε (~> 2> ▷ car displayln))       ; display 0
-    (ε (~> 2> ▷ cdr (_) ▽ displayln)) ; display (B)
+    (ε (~> 2> ▷ cdr displayln))       ; display 0
+    (ε (~> 2> ▷ car (_) ▽ displayln)) ; display (B)
     ¬d                ; ("A" × "B") + ("A" × "C")
     (ε (~> displayln))              ; display #<covalues>
-    (ε (~> ▷ car displayln))        ; display 0
-    (ε (~> ▷ cdr (_) ▽ displayln))) ; display (A B)
+    (ε (~> ▷ cdr displayln))        ; display 0
+    (ε (~> ▷ car (_) ▽ displayln))) ; display (A B)
 
 
 ;;; 1 + 1 + ... + 1 (N) has n elements, so it's isomorphic to
@@ -191,11 +191,11 @@ A
 (define 1+1->bool (☯ (>- #t #f)))
 (define bool->1+1 (☯ (=< true? false?)))
 
-(~> (#t) bool->1+1 ▷ car)       ; 0
-(~> (#t) bool->1+1 ▷ cdr (_) ▽) ; '()
+(~> (#t) bool->1+1 ▷ cdr)       ; 0
+(~> (#t) bool->1+1 ▷ car (_) ▽) ; '()
 
-(~> (#f) bool->1+1 ▷ car)       ; 1
-(~> (#f) bool->1+1 ▷ cdr (_) ▽) ; '()
+(~> (#f) bool->1+1 ▷ cdr)       ; 1
+(~> (#f) bool->1+1 ▷ car (_) ▽) ; '()
 
 (~> () 1< 1+1->bool) ; #t
 (~> () 2< 1+1->bool) ; #f
@@ -204,8 +204,8 @@ A
 (define 1+1+1->abc (☯ (>- "a" "b" "c")))
 (define abc->1+1+1 (☯ (=< (equal? "a") (equal? "b") (equal? "c"))))
 
-(~> ("c") abc->1+1+1 ▷ car)       ; 2
-(~> ("c") abc->1+1+1 ▷ cdr (_) ▽) ; '()
+(~> ("c") abc->1+1+1 ▷ cdr)       ; 2
+(~> ("c") abc->1+1+1 ▷ car (_) ▽) ; '()
 
 (~> () 1< 1+1+1->abc) ; "a"
 (~> () 2< 1+1+1->abc) ; "b"

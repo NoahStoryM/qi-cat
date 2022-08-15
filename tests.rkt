@@ -145,5 +145,5 @@
 
 
 (for ([i (in-list '(1 2 3 4))])
-  (check-equal? (~> (i) (n< i) ▷ car) (sub1 i))
-  (check-equal? (~> (i) (n< i) ▷ cdr (_)) i))
+  (check-equal? (~> (i) (n< i) ▷ cdr) (sub1 i))
+  (check-equal? (~> (i) (n< i) ▷ car (_)) i))
