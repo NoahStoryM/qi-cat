@@ -30,9 +30,13 @@ Covalues is just the Values tagged with natural numbers.
 (~> ((cons (λ () 123) 1)) ◁) ; #<covalues>
 (~> ((cons (λ () 123) 2)) ◁) ; #<covalues>
 
-(~> (123) 1< 5< ▷ cdr) ; 4 = (1 - 1) + (5 - 1)
-(~> (123) 2< 5< ▷ cdr) ; 5 = (2 - 1) + (5 - 1)
-(~> (123) 3< 5< ▷ cdr) ; 6 = (3 - 1) + (5 - 1)
+(~> (123) 1< 5< ▷ cdr)      ; 4 = (1 - 1) +  (5 - 1)
+(~> (123) 2< 5< ▷ cdr)      ; 5 = (2 - 1) +  (5 - 1)
+(~> (123) 3< 5< ▷ cdr)      ; 6 = (3 - 1) +  (5 - 1)
+
+(~> (123) 3< (n<  5) ▷ cdr) ; 6 = (3 - 1) +  (5 - 1)
+(~> (123) 3< (n< -1) ▷ cdr) ; 0 = (3 - 1) + (-1 - 1)
+(~> (123) 3< 0< ▷ cdr)      ; 1 = (3 - 1) +  (0 - 1)
 
 #|
 Procedures can be regarded as the morphisms between Covalues.
@@ -303,3 +307,10 @@ But if A is 1, it seems that the input should be tagged with 2:
        2< factorial)
       _ ; p
       ))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 5. Stable natural number objects
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;; 
