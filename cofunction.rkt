@@ -64,13 +64,17 @@
      (n<: 8)
      (n<: 9))))
 
-(define apply-n<
-  (λ (t #:f0 [f0 values] . a*)
-    (define-values (thk tag)
-      (match a*
-        [(list (covalues thk tag)) (values thk tag)]
-        [_ (values (λ () (list->values a*)) 0)]))
-    (call-with-values thk (apply make-composed f0 (make-list tag t)))))
+(define f0->fn
+  (case-lambda
+    [(t) (f0->fn values t)]
+    [(f0 t)
+     (λ a*
+       (define-values (thk tag)
+         (match a*
+           [(list (covalues thk tag))
+            (values (λ () (call-with-values thk f0)) tag)]
+           [_ (values (λ () (apply f0 a*)) 0)]))
+       (call-with-values thk (apply compose (make-list tag t))))]))
 
 
 #;(begin
