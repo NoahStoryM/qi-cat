@@ -287,7 +287,11 @@ But if A is 1, it seems that the input should be tagged with 2:
           [(>= m 1) (loop (* p m) (sub1 m))])))
     (loop 1 n)))
 
-;;; With covalues, there is no need to define loop:
+;;; With covalues, we can combine factorial and loop together.
+;;; If the argument of factorial is
+;;;   1. tagged with 0 or no tag, it's the input of factorial.
+;;;   2. tagged with 1, it's the input of loop.
+;;;   3. tagged with 2, it's the result.
 (define-flow (factorial n) ; n + p × m + p
   (>- (~>            ; n
        (-< 1 _)      ; p × m  (p = 1, m = n)
