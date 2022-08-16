@@ -146,7 +146,15 @@
 
 (for ([i (in-list '(1 2 3 4))])
   (check-equal? (~> (i) (n< i) ▷ cdr) (sub1 i))
-  (check-equal? (~> (i) (n< i) ▷ car (_)) i))
+  (check-equal? (~> (i) (n< i) ▷ car (_)) i)
+  (check-equal? (~> (1) (n< i) (-< (gen add1) _) apply-n<) i)
+  (check-equal? (~> ("1")
+                    (n< i)
+                    (-< (gen add1)
+                        (gen string->number)
+                        _)
+                    (apply-n< _ #:f0 _ _))
+                i))
 
 
 (for ([i (in-range 10)])

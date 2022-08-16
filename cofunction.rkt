@@ -64,13 +64,21 @@
      (n<: 8)
      (n<: 9))))
 
-#|
-A
- = A + 0 + 0 + ... + 0
-!= 0 + 0 + ... + 0 + A
-|#
+(define apply-n<
+  (λ (t #:f0 [f0 values] . a*)
+    (define-values (thk tag)
+      (match a*
+        [(list (covalues thk tag)) (values thk tag)]
+        [_ (values (λ () (list->values a*)) 0)]))
+    (call-with-values thk (apply make-composed f0 (make-list tag t)))))
+
 
 #;(begin
+    #| A
+    =  A + 0 + 0 + ... + 0
+    != 0 + 0 + ... + 0 + A
+    |#
+
     (define make-covalues
       (λ (thk tag)
         (if (= 0 tag)
