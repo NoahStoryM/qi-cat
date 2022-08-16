@@ -64,9 +64,9 @@
      (n<: 8)
      (n<: 9))))
 
-(define f0->fn
+(define f0->f
   (case-lambda
-    [(t) (f0->fn values t)]
+    [(t) (f0->f values t)]
     [(f0 t)
      (λ a*
        (define-values (thk tag)

@@ -38,6 +38,26 @@ Covalues is just the Values tagged with natural numbers.
 (~> (123) 3< (n< -1) ▷ cdr) ; 0 = (3 - 1) + (-1 - 1)
 (~> (123) 3< 0< ▷ cdr)      ; 1 = (3 - 1) +  (0 - 1)
 
+
+#|
+We can use the tag of covalues (n) to indicate that
+applying a procedure n times.
+
+f0 = f0
+f1 = t∘f0
+f2 = t∘t∘f0
+...
+fn
+
+f0->f : f0 × t -> f
+(~> n< f) = fn
+f0 is `values' by default.
+|#
+
+(~>  (1)  (n< 123) ((f0->f add1) _))                ; 123
+(~> ("1") (n< 123) ((f0->f string->number add1) _)) ; 123
+
+
 #|
 Procedures can be regarded as the morphisms between Covalues.
 |#
@@ -307,10 +327,3 @@ But if A is 1, it seems that the input should be tagged with 2:
        2< factorial)
       _ ; p
       ))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; 5. Natural number objects
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;;; 

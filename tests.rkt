@@ -147,8 +147,8 @@
 (for ([i (in-list '(1 2 3 4))])
   (check-equal? (~> (i) (n< i) ▷ cdr) (sub1 i))
   (check-equal? (~> (i) (n< i) ▷ car (_)) i)
-  (check-equal? (~> (1) (n< i) ((f0->fn add1) _)) i)
-  (check-equal? (~> ("1") (n< i) (f0->fn string->number add1)) i))
+  (check-equal? (~> (1) (n< i) ((f0->f add1) _)) i)
+  (check-equal? (~> ("1") (n< i) (f0->f string->number add1)) i))
 
 
 (for ([i (in-range 10)])
