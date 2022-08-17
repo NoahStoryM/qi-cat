@@ -222,9 +222,17 @@
   (check-equal? (~> (100) h (fanin 2) ▽) '())
   (check-equal? (~> (123) h (fanin 2) ▽) '(123))
 
-  (check-equal? (~> (0)   h (esc (f0->f number->string)) (fanin 2) ▽) '())
-  (check-equal? (~> (100) h (esc (f0->f number->string)) (fanin 2) ▽) '())
-  (check-equal? (~> (123) h (esc (f0->f number->string)) (fanin 2) ▽) '("123")))
+  (check-equal? (~> (0)   h maybe->list) '())
+  (check-equal? (~> (100) h maybe->list) '())
+  (check-equal? (~> (123) h maybe->list) '(123))
+
+  (check-equal? (~> (0)   h maybe->option) #f)
+  (check-equal? (~> (100) h maybe->option) #f)
+  (check-equal? (~> (123) h maybe->option) 123)
+
+  (check-equal? (~> (0)   h (esc (f0->f number->string)) ▽) '())
+  (check-equal? (~> (100) h (esc (f0->f number->string)) ▽) '())
+  (check-equal? (~> (123) h (esc (f0->f number->string)) ▽) '("123")))
 
 (let ()
   (define map-maybe (λ (f) (☯ (~> △ (>< (~> f (fanin 2))) ▽))))

@@ -249,7 +249,6 @@ It seems that ¬d should convert the input to
 the covalues tagged with 1 if the 1st element is of type B.
 But if A is 1, it seems that the input should be tagged with 2:
 (1+B)×(C+D) -> 1×(C+D) + B×(C+D) = C + D + B×(C+D)
-
 |#
 
 ;;; To convert (1 + 1) + ... to 1 + 1 + ..., we can use (==+ _ ≂).
@@ -316,7 +315,12 @@ But if A is 1, it seems that the input should be tagged with 2:
 
 #|
 Maybe type is very common in purely functional languages.
-With covalues, we can use 1 + A to represent (Maybe A)
+With covalues, we can use 1 + A to represent (Maybe A).
+
+Traditional Racket programs use (Option A) -- #f ∪ A --
+which causes confusion when #f is an element of A.
+
+Since 1 + A != A, (Maybe A) is more useful than (Option A).
 |#
 
 (define f
@@ -336,6 +340,14 @@ With covalues, we can use 1 + A to represent (Maybe A)
 (~> (0)   h (fanin 2) ▽) ; '()
 (~> (100) h (fanin 2) ▽) ; '()
 (~> (123) h (fanin 2) ▽) ; '(123)
+
+(~> (0)   h maybe->list) ; '()
+(~> (100) h maybe->list) ; '()
+(~> (123) h maybe->list) ; '(123)
+
+(~> (0)   h maybe->option) ; #f
+(~> (100) h maybe->option) ; #f
+(~> (123) h maybe->option) ; 123
 
 
 (define map-maybe (λ (f) (☯ (~> △ (>< (~> f (fanin 2))) ▽))))
@@ -362,19 +374,26 @@ f0 = f0
 f1 = t∘f0
 f2 = t∘t∘f0
 ...
-fn
-
-f0->f : f0 × t -> f
-(~> n< f) = fn
-f0 is `values' by default.
+fn = t∘...∘t∘f0
 |#
 
-(~>  (1)  (n< 123) ((f0->f add1) _))                ; 123
-(~> ("1") (n< 123) ((f0->f string->number add1) _)) ; 123
+(define t  add1)
+(define f0 string->number)
+(define f1 (☯ (~> f0 t)))
+
+(define f  (f0->f f0 t))
+(define f8 (☯ (~> 9< f)))
+
+(~> ("1") f0) ; 1
+(~> ("1") f1) ; 2
+(~> ("1") f8) ; 9
+
+;;; f0 is `values' by default.
+(~> (1) (n< 123) (esc (f0->f add1))) ; 123
 
 ;;; Since (Maybe A) is just 1 + A, we can use f0->f to
-;;; map t : A -> B to f : (Maybe A) -> (Maybe B)
+;;; map t : A -> B to f : 1 + A -> 1 ∪ B
 
-(~> (0)   h (esc (f0->f number->string)) (fanin 2) ▽) ; '()
-(~> (100) h (esc (f0->f number->string)) (fanin 2) ▽) ; '()
-(~> (123) h (esc (f0->f number->string)) (fanin 2) ▽) ; '("123")
+(~> (0)   h (esc (f0->f number->string)) ▽) ; '()
+(~> (100) h (esc (f0->f number->string)) ▽) ; '()
+(~> (123) h (esc (f0->f number->string)) ▽) ; '("123")

@@ -3,8 +3,15 @@
 (require qi)
 (require "cofunction.rkt")
 
-(provide id
-         bool->1+1
+(provide bool->1+1
+         id add sub mul div
+
+         maybe
+         map-maybe
+         just? nothing?
+         option->maybe maybe->option
+         list->maybe maybe->list
+
          n< 0< 1< 2< 3< 4< 5< 6< 7< 8< 9<
          f0->f
          fanin
@@ -53,5 +60,29 @@
   (esc (λ args (let/ec ec (apply (☯ flo) ec args)))))
 
 
-(define id (procedure-reduce-arity values 1))
 (define bool->1+1 (☯ (~> (=< false? true?))))
+(define id (procedure-reduce-arity values 1))
+(define add (procedure-reduce-arity + 2))
+(define sub (procedure-reduce-arity - 2))
+(define mul (procedure-reduce-arity * 2))
+(define div (procedure-reduce-arity / 2))
+
+
+;; Maybe
+(define ((maybe . a*) f)
+  (☯
+    (~> (-< _ (=< nothing? just?))
+        (<<< 2)
+        (==+ (~> (gen a*) △) f))))
+
+(define just?    (☯ (>- #f #t)))
+(define nothing? (☯ (>- #t #f)))
+
+(define option->maybe (☯ (~> (-< _ (=< not #t)) (<<< 2) (==+ ⏚ _))))
+(define maybe->option (☯ (>- #f _)))
+
+(define list->maybe (☯ (~> (-< _ (=< null? #t)) (<<< 2) (==+ ⏚ car))))
+(define maybe->list (☯ (>- '() list)))
+
+(define map-maybe (λ (f) (☯ (~> △ (>< (~> f (fanin 2))) ▽))))
+
