@@ -151,21 +151,53 @@
   (check-equal? (~> ("1") (n< i) (f0->f string->number add1)) i))
 
 
-(for ([i (in-range 10)])
-  (define factorial-1
-    (λ (n)
-      (define loop
-        (λ (p m)
-          (cond
-            [(=  m 0) p]
-            [(>= m 1) (loop (* p m) (sub1 m))])))
-      (loop 1 n)))
-  (define-flow (factorial-2 n)  ; n + p × m + p
-    (>- (~> (-< 1 _) 2< factorial-2)
-        (~>                               ;   p × m
-         (==* _ (-< _ (=< (>= 1) (= 0)))) ;   p × m   × (1 + 1)
-         (<<< 3)                          ;   p × m   +  p × m
-         (==+ (-< * (~> 2> sub1)) 1>)     ; p*m × m-1 +  p
-         2< factorial-2)
-        _))
-  (check-equal? (factorial-1 i) (factorial-2 i)))
+(for ([factorial
+       (in-list
+        (list
+         (λ (n)
+           (define loop
+             (λ (p m)
+               (cond
+                 [(=  m 0) p]
+                 [(>= m 1) (loop (* p m) (sub1 m))])))
+           (loop 1 n))
+
+         (let ()
+           (define-flow (factorial n)  ; n + p × m + p
+             (>- (~> (-< 1 _) 2< factorial)
+                 (~>                               ;   p × m
+                  (==* _ (-< _ (=< (>= 1) (= 0)))) ;   p × m   × (1 + 1)
+                  (<<< 3)                          ;   p × m   +  p × m
+                  (==+ (-< * (~> 2> sub1)) 1>)     ; p*m × m-1 +  p
+                  2< factorial)
+                 _))
+           factorial)
+
+         (☯
+          (~> (let/cc (==* _ _ 1))             ; loop × n × res
+              (if (~> 2> zero?)
+                  3>
+                  (~> (==* _ (-< _ _) _)       ; loop × n × n × res
+                      (==* (-< _ _) sub1 *)    ; loop × loop × (sub1 n) × (* n res)
+                      (_ _ _ _)))))
+
+         (☯
+          (~> (let/cc (==* _ _ 1))             ; loop × n × res
+              (==* _ (-< _ (=< zero? #t)) _)   ; loop × n × (1 + 1) × res
+              (<<< 3)                          ; loop × n × res + loop × n × res
+              (==+ 3>                          ;            res + (loop loop (sub1 n) (* n res))
+                   (~> (==* _ (-< _ _) _)
+                       (==* (-< _ _) sub1 *)
+                       (_ _ _ _)))
+              (fanin 2)))))])
+
+  (check-equal? (factorial 0) 1)
+  (check-equal? (factorial 1) 1)
+  (check-equal? (factorial 2) 2)
+  (check-equal? (factorial 3) 6)
+  (check-equal? (factorial 4) 24)
+  (check-equal? (factorial 5) 120)
+  (check-equal? (factorial 6) 720)
+  (check-equal? (factorial 7) 5040)
+  (check-equal? (factorial 8) 40320)
+  (check-equal? (factorial 9) 362880))
