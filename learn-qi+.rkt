@@ -248,11 +248,11 @@ A
       [(>  x y) y])))
 
 (define min
-  (☯                    ;       x × y
-   (~> (-< (=< <= >) _) ; (1 + 1) × (x × y)
-       (<<< 1)          ; (x × y) + (x × y)
-       (==+ 1> 2>)      ;       x + y
-       (fanin 2))))     ;       x ∪ y
+  (☯                     ;       x × y
+    (~> (-< (=< <= >) _) ; (1 + 1) × (x × y)
+        (<<< 1)          ; (x × y) + (x × y)
+        (==+ 1> 2>)      ;       x + y
+        (fanin 2))))     ;       x ∪ y
 
 
 #|
@@ -317,13 +317,13 @@ But if A is 1, it seems that the input should be tagged with 2:
 ;;;   2. tagged with 1, it's the input of loop.
 ;;;   3. tagged with 2, it's the result.
 (define-flow (factorial n) ; n + p × m + p
-  (>- (~>            ; n
-       (-< 1 _)      ; p × m  (p = 1, m = n)
-       2< factorial)
-      (~>                               ;   p × m
-       (==* _ (-< _ (=< (>= 1) (= 0)))) ;   p × m   × (1 + 1)
-       (<<< 3)                          ;   p × m   +  p × m
-       (==+ (-< * (~> 2> sub1)) 1>)     ; p*m × m-1 +  p
-       2< factorial)
+  (>- (~>             ; n
+        (-< 1 _)      ; p × m  (p = 1, m = n)
+        2< factorial)
+      (~>                                ;   p × m
+        (==* _ (-< _ (=< (>= 1) (= 0)))) ;   p × m   × (1 + 1)
+        (<<< 3)                          ;   p × m   +  p × m
+        (==+ (-< * (~> 2> sub1)) 1>)     ; p*m × m-1 +  p
+        2< factorial)
       _ ; p
       ))

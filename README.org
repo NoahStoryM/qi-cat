@@ -74,23 +74,24 @@
 
 (define eval
   (☯
-   (~> (==*
+    (~>
+      (==*
         (-<
-         (=< self-evaluating?
-             variable?
-             quoted?
-             assignment?
-             definition?
-             if?
-             lambda?
-             begin?
-             cond?
-             application?
-             #t)
-         _)
+          (=< self-evaluating?
+              variable?
+              quoted?
+              assignment?
+              definition?
+              if?
+              lambda?
+              begin?
+              cond?
+              application?
+              #t)
+          _)
         _)
-       (<<< 1)
-       (==+
+      (<<< 1)
+      (==+
         1>
         lookup-variable-value
         (~> 1> text-of-quotation)
@@ -104,6 +105,6 @@
                 (~> (==* operands _) list-of-values))
             apply)
         (~> 1> (error "Unknown expression type -- EVAL" _)))
-       (fanin 11))))
+      (fanin 11))))
 
 #+end_src
