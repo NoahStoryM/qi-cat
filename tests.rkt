@@ -201,3 +201,40 @@
   (check-equal? (factorial 7) 5040)
   (check-equal? (factorial 8) 40320)
   (check-equal? (factorial 9) 362880))
+
+
+(let ()
+  (define f
+    (☯                           ; Int
+      (~> (-< _ (=< (= 0) #t))   ; Int × (1 + 1)
+          (<<< 2)                ; Int + Int
+          (==+ ⏚ _))))           ; 1 + Int
+
+  (define g
+    (☯                           ; Int
+      (~> (-< _ (=< (= 100) #t)) ; Int × (1 + 1)
+          (<<< 2)                ; Int + Int
+          (==+ ⏚ _))))           ; 1 + Int
+
+  (define h (☯ (~> f (>- _ g))))
+
+  (check-equal? (~> (0)   h (fanin 2) ▽) '())
+  (check-equal? (~> (100) h (fanin 2) ▽) '())
+  (check-equal? (~> (123) h (fanin 2) ▽) '(123))
+
+  (check-equal? (~> (0)   h (esc (f0->f number->string)) (fanin 2) ▽) '())
+  (check-equal? (~> (100) h (esc (f0->f number->string)) (fanin 2) ▽) '())
+  (check-equal? (~> (123) h (esc (f0->f number->string)) (fanin 2) ▽) '("123")))
+
+(let ()
+  (define map-maybe (λ (f) (☯ (~> △ (>< (~> f (fanin 2))) ▽))))
+  (define lookup
+    (λ (ls)
+      (☯
+        (~> (assoc _ ls)
+            (-< _ (=< not #t))
+            (<<< 2)
+            (==+ ⏚ cadr)))))
+  (check-equal? ((map-maybe (lookup '([1 "11"] [2 "22"] [3 "33"])))
+                 '(1 3 5))
+                '("11" "33")))

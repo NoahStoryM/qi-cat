@@ -40,25 +40,6 @@ Covalues is just the Values tagged with natural numbers.
 
 
 #|
-We can use the tag of covalues (n) to indicate that
-applying a procedure n times.
-
-f0 = f0
-f1 = t∘f0
-f2 = t∘t∘f0
-...
-fn
-
-f0->f : f0 × t -> f
-(~> n< f) = fn
-f0 is `values' by default.
-|#
-
-(~>  (1)  (n< 123) ((f0->f add1) _))                ; 123
-(~> ("1") (n< 123) ((f0->f string->number add1) _)) ; 123
-
-
-#|
 Procedures can be regarded as the morphisms between Covalues.
 |#
 
@@ -327,3 +308,73 @@ But if A is 1, it seems that the input should be tagged with 2:
         2< factorial)
       _ ; p
       ))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 5. Maybe
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#|
+Maybe type is very common in purely functional languages.
+With covalues, we can use 1 + A to represent (Maybe A)
+|#
+
+(define f
+  (☯                           ; Int
+    (~> (-< _ (=< (= 0) #t))   ; Int × (1 + 1)
+        (<<< 2)                ; Int + Int
+        (==+ ⏚ _))))           ; 1 + Int
+
+(define g
+  (☯                           ; Int
+    (~> (-< _ (=< (= 100) #t)) ; Int × (1 + 1)
+        (<<< 2)                ; Int + Int
+        (==+ ⏚ _))))           ; 1 + Int
+
+(define h (☯ (~> f (>- _ g))))
+
+(~> (0)   h (fanin 2) ▽) ; '()
+(~> (100) h (fanin 2) ▽) ; '()
+(~> (123) h (fanin 2) ▽) ; '(123)
+
+
+(define map-maybe (λ (f) (☯ (~> △ (>< (~> f (fanin 2))) ▽))))
+(define lookup
+  (λ (ls)
+    (☯
+      (~> (assoc _ ls)
+          (-< _ (=< not #t))
+          (<<< 2)
+          (==+ ⏚ cadr)))))
+((map-maybe (lookup '([1 "11"] [2 "22"] [3 "33"])))
+ '(1 3 5)) ; '("11" "33")
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 6. Natural Number Object
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#|
+We can use the tag of covalues (n) to indicate that
+applying a procedure n times.
+
+f0 = f0
+f1 = t∘f0
+f2 = t∘t∘f0
+...
+fn
+
+f0->f : f0 × t -> f
+(~> n< f) = fn
+f0 is `values' by default.
+|#
+
+(~>  (1)  (n< 123) ((f0->f add1) _))                ; 123
+(~> ("1") (n< 123) ((f0->f string->number add1) _)) ; 123
+
+;;; Since (Maybe A) is just 1 + A, we can use f0->f to
+;;; map t : A -> B to f : (Maybe A) -> (Maybe B)
+
+(~> (0)   h (esc (f0->f number->string)) (fanin 2) ▽) ; '()
+(~> (100) h (esc (f0->f number->string)) (fanin 2) ▽) ; '()
+(~> (123) h (esc (f0->f number->string)) (fanin 2) ▽) ; '("123")
