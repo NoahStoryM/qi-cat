@@ -137,9 +137,9 @@
   #:property prop:procedure
   (λ (self . args) (error '≂ "Can't call ≂")))
 (define ≂ (coprocedure '()))
-(define power ≂)
+(define source ≂)
 (define ≂? (λ (arg) (and (coprocedure? arg) (null? (coprocedure-f* arg)))))
-(define power? ≂?)
+(define source? ≂?)
 
 (struct coproducting coprocedure ()
   #:property prop:procedure
