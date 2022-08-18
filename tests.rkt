@@ -267,3 +267,53 @@
   (check-equal? ((map-maybe (lookup '([1 "11"] [2 "22"] [3 "33"])))
                  '(1 3 5))
                 '("11" "33")))
+
+(let ()
+  ;;; (Pair A) = A × (List A)
+  ;;; (List A) = 1 + (Pair A)
+
+  (define list->List
+    (let ([list->List (λ _ (apply list->List _))])
+      (☯
+        (~> (-< _ (=< null? pair?))
+            (<<< 2)
+            (==+ ⏚ (-< car (~> cdr list->List)))))))
+
+  (define List->list
+    (let ([List->list (λ _ (apply List->list _))])
+      (☯ (>- '() (~> (==* _ List->list) cons)))))
+
+  (~> ('(1 2 3)) list->List List->list) ; '(1 2 3)
+
+  (define (Map f)
+    ;; g : (Pair A) -> (Pair A)
+    ;; h : (List A) -> (List A)
+    (define-values (g h)
+      (let ([g (λ _ (apply g _))]
+            [h (λ _ (apply h _))])
+        (values
+         (☯ (==* f h))
+         (☯ (==+ _ g)))))
+    h)
+
+  (check-equal? (~> ('(1 2 3)) list->List (Map sub1) List->list)
+                '(0 1 2)))
+
+(let ()
+  ;;; Nat = 1 + Nat
+  ;;; 0 = 1
+  ;;; 1 = 1 + (1)             != 1 + 1
+  ;;; 2 = 1 + (1 + (1))       != 1 + 1 + 1
+  ;;; 3 = 1 + (1 + (1 + (1))) != 1 + 1 + 1 + 1
+
+  (define num->nat
+    (let ([num->nat (λ _ (apply num->nat _))])
+      (☯
+        (~> (-< _ (=< zero? exact-positive-integer?))
+            (<<< 2)
+            (==+ ⏚ (~> sub1 (clos num->nat) (cons _ 0) ◁))))))
+  (define nat->num
+    (let ([nat->num (λ _ (apply nat->num _))])
+      (☯ (>- 0 (~> nat->num add1)))))
+
+  (check-equal? (~> (9) num->nat nat->num) 9))
