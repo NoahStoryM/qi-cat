@@ -102,6 +102,11 @@ We'll use
 A
 = 1 × A = A × 1
 = 0 + A = A + 0
+
+2 = 1 + 1
+3 = 1 + 1 + 1
+...
+N = 1 + ... + 1
 |#
 
 ;;; _ : * -> *
@@ -419,6 +424,24 @@ fn = t∘...∘t∘f0
 
 ;;; (Pair A) = A × (List A)
 ;;; (List A) = 1 + (Pair A)
+;;;          = 1 + A × (List A)
+
+#| Tricks
+
+(List A) = 1 + A × (List A)
+(List A) = 1 + A × (1 + A × (List A))
+(List A) ≅ 1 + A + A × A × (List A)
+...
+(List A) ≅ 1 + A + A × A + A × A × A + ...
+
+
+(List A) ≅ 1 + A × (List A)
+(List A) - A × (List A) ≅ 1
+(1 - A) × (List A) ≅ 1
+(List A) ≅ 1 / (1 - A)
+(List A) ≅ 1 + A + A × A + A × A × A + ...
+
+|#
 
 (define list->List
   (let ([list->List (λ _ (apply list->List _))])
