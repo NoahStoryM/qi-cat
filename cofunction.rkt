@@ -3,10 +3,12 @@
 (require
  racket/list
  racket/match
+ racket/function
  (only-in racket/math natural?)
  syntax/parse/define)
 
-(provide (all-defined-out))
+(provide (all-defined-out)
+         (rename-out [identity id]))
 
 
 ;; utils
@@ -103,10 +105,10 @@
 (define ◁
   (match-lambda
     [(cons (? procedure? thk) (? natural? tag))
-     #:when (zero? (procedure-arity thk))
+     #:when (arity-includes? (procedure-arity thk) 0)
      (covalues thk tag)]
     #;[(? procedure? thk)
-       #:when (zero? (procedure-arity thk))
+       #:when (arity-includes? (procedure-arity thk) 0)
        (covalues thk 0)]))
 (define ▷
   (match-lambda

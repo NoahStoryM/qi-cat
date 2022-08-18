@@ -61,7 +61,7 @@
 
 
 (define bool->1+1 (☯ (~> (=< false? true?))))
-(define id (procedure-reduce-arity values 1))
+
 (define add (procedure-reduce-arity + 2))
 (define sub (procedure-reduce-arity - 2))
 (define mul (procedure-reduce-arity * 2))
