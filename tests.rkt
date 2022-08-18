@@ -163,6 +163,22 @@
            (loop 1 n))
 
          (let ()
+           (define factorial
+             (let ([factorial (λ _ (apply factorial _))])
+               (☯ ; n + p × m + p
+                 (>- (~>             ; n
+                       (-< 1 _)      ; p × m  (p = 1, m = n)
+                       2< factorial)
+                     (~>                                ;   p × m
+                       (==* _ (-< _ (=< (>= 1) (= 0)))) ;   p × m   × (1 + 1)
+                       (<<< 3)                          ;   p × m   +  p × m
+                       (==+ (-< * (~> 2> sub1)) 1>)     ; p*m × m-1 +  p
+                       2< factorial)
+                     _ ; p
+                     ))))
+           factorial)
+
+         (let ()
            (define-flow (factorial n)  ; n + p × m + p
              (>- (~> (-< 1 _) 2< factorial)
                  (~>                                ;   p × m
