@@ -411,3 +411,37 @@ fn = t∘...∘t∘f0
 (~> (0)   h maybe->option) ; #f
 (~> (100) h maybe->option) ; #f
 (~> (123) h maybe->option) ; 123
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 7. Algebraic Data Type
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;; (Pair A) = A × (List A)
+;;; (List A) = 1 + (Pair A)
+
+(define list->List
+  (let ([list->List (λ _ (apply list->List _))])
+    (☯
+      (~> (-< _ (=< null? pair?))
+          (<<< 2)
+          (==+ ⏚ (-< car (~> cdr list->List)))))))
+
+(define List->list
+  (let ([List->list (λ _ (apply List->list _))])
+    (☯ (>- '() (~> (==* _ List->list) cons)))))
+
+(~> ('(1 2 3)) list->List List->list) ; '(1 2 3)
+
+(define (Map f)
+  ;; g : (Pair A) -> (Pair A)
+  ;; h : (List A) -> (List A)
+  (define-values (g h)
+    (let ([g (λ _ (apply g _))]
+          [h (λ _ (apply h _))])
+      (values
+       (☯ (==* f h))
+       (☯ (==+ _ g)))))
+  h)
+
+(~> ('(1 2 3)) list->List (Map sub1) List->list) ; '(0 1 2)
