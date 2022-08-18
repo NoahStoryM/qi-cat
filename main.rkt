@@ -85,4 +85,3 @@
 (define maybe->list (☯ (>- '() list)))
 
 (define map-maybe (λ (f) (☯ (~> △ (>< (~> f (fanin 2))) ▽))))
-

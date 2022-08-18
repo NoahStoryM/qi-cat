@@ -397,3 +397,15 @@ fn = t∘...∘t∘f0
 (~> (0)   h (esc (f0->f number->string)) ▽) ; '()
 (~> (100) h (esc (f0->f number->string)) ▽) ; '()
 (~> (123) h (esc (f0->f number->string)) ▽) ; '("123")
+
+;;; map t : A -> 1 + B to f : 1 + A -> 1 + B
+
+(define h (☯ (~> f (esc (f0->f g)))))
+
+(~> (0)   h maybe->list) ; '()
+(~> (100) h maybe->list) ; '()
+(~> (123) h maybe->list) ; '(123)
+
+(~> (0)   h maybe->option) ; #f
+(~> (100) h maybe->option) ; #f
+(~> (123) h maybe->option) ; 123
