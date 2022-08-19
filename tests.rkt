@@ -102,6 +102,10 @@
            (~> (=< number? string?)     ;       1 + 1
                (==+ 'number 'string)    ; 'number + 'string
                (fanin 2)))              ; 'number ∪ 'string
+
+         (☯                             ;     num ∪ str
+           (~> (=< number? string?)     ;       1 + 1
+               (>- 'number 'string)))   ; 'number ∪ 'string
          ))])
   (check-equal? (t 123) 'number)
   (check-equal? (t "0") 'string))
@@ -317,3 +321,41 @@
       (☯ (>- 0 (~> nat->num add1)))))
 
   (check-equal? (~> (9) num->nat nat->num) 9))
+
+(let ()
+  ;;; Env : 1 + Var × (Box Val) × Env
+
+
+  ;; empty-environment : * -> Env
+  (define empty-environment (☯ (~> ⏚ 1<)))
+
+  ;; extend-environment : Var × Val × Env -> Env
+  (define extend-environment (☯ (~> (==* id box id) 2<)))
+
+  ;; lookup-variable-value : Var × Env
+  (define lookup-variable-value
+    (let ([lookup-variable-value (λ _ (apply lookup-variable-value _))])
+      (☯
+        (~> (<<< 2) ; Var + Var × Var × (Box Val) × Env
+            (>- (error
+                 'lookup-variable-value
+                 "no value found for key\n  key: ~a" _)
+                (~> (-< 1> (group 2 (~> eq? bool->1+1) _)) ; Var × (1 + 1) × (Box Val) × Env
+                    (<<< 2)
+                    (>- (~> (==* id ⏚ id) lookup-variable-value)
+                        (~> 2> unbox))))))))
+
+
+  (check-equal?
+   (~> () empty-environment
+       (-< 'a 0 _) extend-environment
+       (-< 'b 1 _) extend-environment
+       (-< 'b _) lookup-variable-value)
+   1)
+
+  (check-equal?
+   (~> () empty-environment
+       (-< 'a 0 _) extend-environment
+       (-< 'b 1 _) extend-environment
+       (-< 'a _) lookup-variable-value)
+   0))

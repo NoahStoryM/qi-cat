@@ -68,43 +68,54 @@
       [application?
        (~> (-< (~> operator (eval env))
                (~> operands (list-of-values env)))
-           apply)]
+           (esc apply))]
       [else (error "Unknown expression type -- EVAL" _)])))
 
 
-(define eval
+;; sexp->sum : S-Exp ->   Self-Exp
+;;                      + Var-Exp
+;;                      + Quoted-Exp
+;;                      + Assign-Exp
+;;                      + Definition-Exp
+;;                      + If-Exp
+;;                      + Lambda-Exp
+;;                      + Begin-Exp
+;;                      + Cond-Exp
+;;                      + Application-Exp
+;;                      + Else
+(define sexp->sum
   (☯
-    (~>
-      (==*
-        (-<
-          (=< self-evaluating?
-              variable?
-              quoted?
-              assignment?
-              definition?
-              if?
-              lambda?
-              begin?
-              cond?
-              application?
-              #t)
-          _)
-        _)
-      (<<< 1)
-      (==+
-        1>
-        lookup-variable-value
-        (~> 1> text-of-quotation)
-        eval-assignment
-        eval-definition
-        eval-if
-        (~> (==* (-< lambda-parameters lambda-body) _) make-procedure)
-        (~> (==* begin-actions _) eval-sequence)
-        (~> (==* cond->if _) eval)
-        (~> (-< (~> (==* operator _) eval)
-                (~> (==* operands _) list-of-values))
-            apply)
-        (~> 1> (error "Unknown expression type -- EVAL" _)))
-      (fanin 11))))
+    (~> (-< _
+            (=< self-evaluating?
+                variable?
+                quoted?
+                assignment?
+                definition?
+                if?
+                lambda?
+                begin?
+                cond?
+                application?
+                #t))
+        (<<< 2))))
+
+(define-flow (eval exp env)
+  (~>
+    (==* sexp->sum _)
+    (<<< 1)
+    (>-
+      1>
+      lookup-variable-value
+      (~> 1> text-of-quotation)
+      eval-assignment
+      eval-definition
+      eval-if
+      (~> (==* (-< lambda-parameters lambda-body) _) make-procedure)
+      (~> (==* begin-actions _) eval-sequence)
+      (~> (==* cond->if _) eval)
+      (~> (-< (~> (==* operator _) eval)
+              (~> (==* operands _) list-of-values))
+          (esc apply))
+      (~> 1> (error "Unknown expression type -- EVAL" _)))))
 
 #+end_src

@@ -237,8 +237,7 @@ N = 1 + ... + 1
   (☯                     ;       x × y
     (~> (-< (=< <= >) _) ; (1 + 1) × (x × y)
         (<<< 1)          ; (x × y) + (x × y)
-        (==+ 1> 2>)      ;       x + y
-        (fanin 2))))     ;       x ∪ y
+        (>- 1> 2>))))    ;       x ∪ y
 
 
 #|
@@ -456,6 +455,14 @@ fn = t∘...∘t∘f0
 
 (~> ('(1 2 3)) list->List List->list) ; '(1 2 3)
 
+(define Cons (☯ 2<))
+(define Car  (☯ (>- (raise-argument-error 'Car "pair?" '()) 1>)))
+(define Cdr  (☯ (>- (raise-argument-error 'Cdr "pair?" '()) 2>)))
+(~> ('(1 2 3)) list->List Car)                   ; 1
+(~> ('(1 2 3)) list->List Cdr List->list)        ; '(2 3)
+(~> ('(1 2 3)) list->List Cdr Car)               ; 2
+(~> ('(1 2 3)) list->List (Cons 0 _) List->list) ; '(0 1 2 3)
+
 (define (Map f)
   ;; g : (Pair A) -> (Pair A)
   ;; h : (List A) -> (List A)
@@ -466,7 +473,6 @@ fn = t∘...∘t∘f0
        (☯ (==* f h))
        (☯ (==+ _ g)))))
   h)
-
 (~> ('(1 2 3)) list->List (Map sub1) List->list) ; '(0 1 2)
 
 
@@ -487,3 +493,36 @@ fn = t∘...∘t∘f0
     (☯ (>- 0 (~> nat->num add1)))))
 
 (~> (9) num->nat nat->num) ; 9
+
+
+;;; Env : 1 + Var × (Box Val) × Env
+
+;; empty-environment : * -> Env
+(define empty-environment (☯ (~> ⏚ 1<)))
+
+;; extend-environment : Var × Val × Env -> Env
+(define extend-environment (☯ (~> (==* id box id) 2<)))
+
+;; lookup-variable-value : Var × Env
+(define lookup-variable-value
+  (let ([lookup-variable-value (λ _ (apply lookup-variable-value _))])
+    (☯
+      (~> (<<< 2) ; Var + Var × Var × (Box Val) × Env
+          (>- (error
+               'lookup-variable-value
+               "no value found for key\n  key: ~a" _)
+              (~> (-< 1> (group 2 (~> eq? bool->1+1) _)) ; Var × (1 + 1) × (Box Val) × Env
+                  (<<< 2)
+                  (>- (~> (==* id ⏚ id) lookup-variable-value)
+                      (~> 2> unbox))))))))
+
+
+(~> () empty-environment
+    (-< 'a 0 _) extend-environment
+    (-< 'b 1 _) extend-environment
+    (-< 'a _) lookup-variable-value) ; 0
+
+(~> () empty-environment
+    (-< 'a 0 _) extend-environment
+    (-< 'b 1 _) extend-environment
+    (-< 'b _) lookup-variable-value) ; 1
