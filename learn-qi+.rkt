@@ -50,9 +50,9 @@ Procedures can be regarded as the morphisms between Covalues.
 
 
 #|
-For f : A -> X and g : B -> Y, there are
- f+g  = (==+ f g) : A + B -> X + Y
-<f|g> = (>-  f g) : A + B -> X ∪ Y
+For f : A + B -> V + W and g : C + D -> X + Y, there are
+ f+g  = (==+ f g) : A + B + C + D ->  V + W  +  X + Y
+<f|g> = (>-  f g) : A + B + C + D -> (V + W) ∪ (X + Y)
 |#
 
 ;;; add1 : Number -> Number
@@ -109,10 +109,10 @@ A
 N = 1 + ... + 1
 |#
 
-;;; _ : * -> *
 
-;;; We can use ==* and ⏚ to do the same things as n>.
+;;; _ : * -> *
 ;;; ⏚ : * -> 1
+;;; We can use ==* and ⏚ to do the same things as n>.
 
 ;; (==* _ ⏚ ⏚) : (A×B×C -> A) = (A×B×C -> A×1×1)
 ;; (==* ⏚ _ ⏚) : (A×B×C -> B) = (A×B×C -> 1×B×1)
@@ -128,8 +128,8 @@ N = 1 + ... + 1
 
 
 ;;; Similarly:
-;;; We can use ==+ and ≂ to do the same things as n<.
 ;;; ≂ : 0 -> *
+;;; We can use ==+ and ≂ to do the same things as n<.
 
 ;; (==+ _ ≂ ≂) : (A -> A+B+C) = (A+0+0 -> A+B+C)
 ;; (==+ ≂ _ ≂) : (B -> A+B+C) = (0+B+0 -> A+B+C)
@@ -166,29 +166,13 @@ N = 1 + ... + 1
 ;; (>>> n) : move the tag from input to its nth element.
 ;; (<<< n) : move the tag from the nth element to input.
 
-(~> ("A" "B") 1< d)
-(~> ("A" "B") ; "A" × "B"
+(~> ("A" "B") ;  "A" × "B"
     (==+ _ ≂) ; ("A" × "B") + ("A" × "C")
-    (ε (~> displayln))             ; display #<covalues>
-    (ε (~> ▷ cdr displayln))       ; display 0
-    (ε (~> ▷ car (_) ▽ displayln)) ; display (A B)
-    d         ; "A" × ("B" + "C")
-    (ε (~> 1> displayln))              ; display A
-    (ε (~> 2> displayln))              ; display #<covalues>
-    (ε (~> 2> ▷ cdr displayln))        ; display 0
-    (ε (~> 2> ▷ car (_) ▽ displayln))) ; display (B)
+    d)        ;  "A" × ("B" + "C")
 
-(~> ("A" "B") (==* _ 1<) ¬d)
-(~> ("A" "B")         ; "A" × "B"
-    (==* _ (==+ _ ≂)) ; "A" × ("B" + "C")
-    (ε (~> 1> displayln))             ; display A
-    (ε (~> 2> displayln))             ; display #<covalues>
-    (ε (~> 2> ▷ cdr displayln))       ; display 0
-    (ε (~> 2> ▷ car (_) ▽ displayln)) ; display (B)
-    ¬d                ; ("A" × "B") + ("A" × "C")
-    (ε (~> displayln))              ; display #<covalues>
-    (ε (~> ▷ cdr displayln))        ; display 0
-    (ε (~> ▷ car (_) ▽ displayln))) ; display (A B)
+(~> ("A" "B")         ;  "A" × "B"
+    (==* _ (==+ _ ≂)) ;  "A" × ("B" + "C")
+    ¬d)               ; ("A" × "B") + ("A" × "C")
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -356,14 +340,14 @@ Since 1 + A != A, (Maybe A) is more useful than (Option A).
 (~> (123) h maybe->option) ; 123
 
 
-(define map-maybe (λ (f) (☯ (~> △ (>< (~> f (fanin 2))) ▽))))
 (define lookup
   (λ (ls)
     (☯
-      (~> (assoc _ ls)
+      (~> (assoc ls)
           (-< _ (=< not #t))
           (<<< 2)
           (==+ ⏚ cadr)))))
+(define map-maybe (λ (f) (☯ (~> △ (>< (~> f (fanin 2))) ▽))))
 ((map-maybe (lookup '([1 "11"] [2 "22"] [3 "33"])))
  '(1 3 5)) ; '("11" "33")
 
@@ -386,12 +370,14 @@ fn = t∘...∘t∘f0
 (define t  add1)
 (define f0 string->number)
 (define f1 (☯ (~> f0 t)))
+(define f2 (☯ (~> f0 t t)))
 
 (define f  (f0->f f0 t))
 (define f8 (☯ (~> 9< f)))
 
 (~> ("1") f0) ; 1
 (~> ("1") f1) ; 2
+(~> ("1") f2) ; 3
 (~> ("1") f8) ; 9
 
 ;;; f0 is `values' by default.
