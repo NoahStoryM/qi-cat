@@ -407,9 +407,89 @@ fn = t∘...∘t∘f0
 ;; 7. Recursive Types
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+#|
+Compared to other data structures, Values and Covalues
+may be more suitable for Qi code.
+|#
+
+
+;;; A simple interpreter written in Racket style:
+(require racket/fixnum)
+(struct Exp ())
+(struct Int  Exp (value))
+(struct Prim Exp (op arg*))
+
+;; parser : S-Exp -> Exp
+(define parser
+  (λ (code)
+    (match code
+      [(? fixnum? n) (Int n)]
+      [`(,rator ,rands ...)
+       (Prim rator (map parser rands))])))
+
+(define (interp-exp e)
+  (match e
+    [(Int n) n]
+    [(Prim 'read '()) (read)]
+    [(Prim '- (list e)) (fx- 0 (interp-exp e))]
+    [(Prim '+ e*) (apply fx+ (map interp-exp e*))]))
+
+;;; Same interpreter written in Qi style:
+(require racket/fixnum)
+
+;; Exp : Fixnum + 1 + Exp + Exp × ... × Exp
+;; parser : S-Exp -> Exp
+(define parser
+  (λ (code)
+    (match code
+      [(? fixnum? n) (~> (n) 1<)]
+      [`(read) (~> () 2<)]
+      [`(- ,e) (~> (e) parser 3<)]
+      [`(+ ,e* ...) (~> (e*) △ (>< parser) 4<)])))
+
+(define-flow (interp-exp e)
+  (>- _
+      read
+      (~> interp-exp (fx- 0 _))
+      (~> (>< interp-exp) fx+)))
+
+
 ;;; (Pair A) = A × (List A)
 ;;; (List A) = 1 + (Pair A)
 ;;;          = 1 + A × (List A)
+
+(define list->List
+  (let ([list->List (λ _ (apply list->List _))])
+    (☯
+      (~> (-< _ (=< null? pair?))
+          (<<< 2)
+          (==+ ⏚ (-< car (~> cdr list->List)))))))
+
+(define List->list
+  (let ([List->list (λ _ (apply List->list _))])
+    (☯ (>- '() (~> (==* _ List->list) cons)))))
+
+(~> ('(1 2 3)) list->List List->list) ; '(1 2 3)
+
+(define (Map f)
+  ;; g : (Pair A) -> (Pair A)
+  ;; h : (List A) -> (List A)
+  (define-values (g h)
+    (let ([g (λ _ (apply g _))]
+          [h (λ _ (apply h _))])
+      (values
+       (☯ (==* f h))
+       (☯ (==+ _ g)))))
+  h)
+(~> ('(1 2 3)) list->List (Map sub1) List->list) ; '(0 1 2)
+
+(define Cons (☯ 2<))
+(define Car  (☯ (>- (raise-argument-error 'Car "pair?" '()) 1>)))
+(define Cdr  (☯ (>- (raise-argument-error 'Cdr "pair?" '()) 2>)))
+(~> ('(1 2 3)) list->List Car)                   ; 1
+(~> ('(1 2 3)) list->List Cdr List->list)        ; '(2 3)
+(~> ('(1 2 3)) list->List Cdr Car)               ; 2
+(~> ('(1 2 3)) list->List (Cons 0 _) List->list) ; '(0 1 2 3)
 
 #| Tricks
 
@@ -428,52 +508,19 @@ fn = t∘...∘t∘f0
 
 |#
 
-(define list->List
-  (let ([list->List (λ _ (apply list->List _))])
-    (☯
-      (~> (-< _ (=< null? pair?))
-          (<<< 2)
-          (==+ ⏚ (-< car (~> cdr list->List)))))))
-
-(define List->list
-  (let ([List->list (λ _ (apply List->list _))])
-    (☯ (>- '() (~> (==* _ List->list) cons)))))
-
-(~> ('(1 2 3)) list->List List->list) ; '(1 2 3)
-
-(define Cons (☯ 2<))
-(define Car  (☯ (>- (raise-argument-error 'Car "pair?" '()) 1>)))
-(define Cdr  (☯ (>- (raise-argument-error 'Cdr "pair?" '()) 2>)))
-(~> ('(1 2 3)) list->List Car)                   ; 1
-(~> ('(1 2 3)) list->List Cdr List->list)        ; '(2 3)
-(~> ('(1 2 3)) list->List Cdr Car)               ; 2
-(~> ('(1 2 3)) list->List (Cons 0 _) List->list) ; '(0 1 2 3)
-
-(define (Map f)
-  ;; g : (Pair A) -> (Pair A)
-  ;; h : (List A) -> (List A)
-  (define-values (g h)
-    (let ([g (λ _ (apply g _))]
-          [h (λ _ (apply h _))])
-      (values
-       (☯ (==* f h))
-       (☯ (==+ _ g)))))
-  h)
-(~> ('(1 2 3)) list->List (Map sub1) List->list) ; '(0 1 2)
-
 
 ;;; Nat = 1 + Nat
 ;;; 0 = 1
-;;; 1 = 1 + (1)             != 1 + 1
-;;; 2 = 1 + (1 + (1))       != 1 + 1 + 1
-;;; 3 = 1 + (1 + (1 + (1))) != 1 + 1 + 1 + 1
+;;; 1 = 1 + (1)
+;;; 2 = 1 + (1 + (1))
+;;; 3 = 1 + (1 + (1 + (1)))
 
 (define num->nat
   (let ([num->nat (λ _ (apply num->nat _))])
     (☯
       (~> (-< _ (=< zero? exact-positive-integer?))
           (<<< 2)
-          (==+ ⏚ (~> sub1 (clos num->nat) (cons _ 0) ◁))))))
+          (==+ ⏚ (~> sub1 (clos num->nat) (cons 0) ◁))))))
 (define nat->num
   (let ([nat->num (λ _ (apply nat->num _))])
     (☯ (>- 0 (~> nat->num add1)))))
