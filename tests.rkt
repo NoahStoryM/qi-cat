@@ -27,30 +27,30 @@
        (in-list
         (list
          (☯                                ;   1 + 1 + 1 + 1
-           (~> (==+ (>- #t #f) (>- #t #f)) ;       B + B
-               (==+ (-< #t id) (-< #f id)) ; (t × B) + (f × B)
-               (>- _ _)))                  ; (t × B) ∪ (f × B) = B × B
+           (~> (==+ (>- #f #t) (>- #f #t)) ;       B + B
+               (==+ (-< #f id) (-< #t id)) ; (f × B) + (t × B)
+               (>- _ _)))                  ; (f × B) ∪ (t × B) = B × B
 
          (☯
-           (~> (==+ (~> (>- #t #f) (-< #t id))
-                    (~> (>- #t #f) (-< #f id)))
+           (~> (==+ (~> (>- #f #t) (-< #f id))
+                    (~> (>- #f #t) (-< #t id)))
                (>- _ _)))
 
          (☯
-           (~> (==+ (~> (>- #t #f) (-< #t id))
-                    (~> (>- #t #f) (-< #f id)))
+           (~> (==+ (~> (>- #f #t) (-< #f id))
+                    (~> (>- #f #t) (-< #t id)))
                (fanin 2)))
          ))])
 
-  (check-equal? (values->list (~> () 1< f)) '(#t #t))
-  (check-equal? (values->list (~> () 2< f)) '(#t #f))
-  (check-equal? (values->list (~> () 3< f)) '(#f #t))
-  (check-equal? (values->list (~> () 4< f)) '(#f #f))
+  (check-equal? (values->list (~> () 1< f)) '(#f #f))
+  (check-equal? (values->list (~> () 2< f)) '(#f #t))
+  (check-equal? (values->list (~> () 3< f)) '(#t #f))
+  (check-equal? (values->list (~> () 4< f)) '(#t #t))
 
-  (check-equal? (values->list (~> () (==+ _ ≂ ≂ ≂) f)) '(#t #t))
-  (check-equal? (values->list (~> () (==+ ≂ _ ≂ ≂) f)) '(#t #f))
-  (check-equal? (values->list (~> () (==+ ≂ ≂ _ ≂) f)) '(#f #t))
-  (check-equal? (values->list (~> () (==+ ≂ ≂ ≂ _) f)) '(#f #f)))
+  (check-equal? (values->list (~> () (==+ _ ≂ ≂ ≂) f)) '(#f #f))
+  (check-equal? (values->list (~> () (==+ ≂ _ ≂ ≂) f)) '(#f #t))
+  (check-equal? (values->list (~> () (==+ ≂ ≂ _ ≂) f)) '(#t #f))
+  (check-equal? (values->list (~> () (==+ ≂ ≂ ≂ _) f)) '(#t #t)))
 
 
 (for ([¬f
@@ -64,7 +64,7 @@
          (☯                              ;       B × B
            (~> (==* bool->1+1 bool->1+1) ; (1 + 1) × (1 + 1)
                (<<< 1)                   ; (1 + 1) + (1 + 1)
-               (==+ 1< 2<)))             ;   1 + 1 + 1 + 1
+               (==+ 0< +1<)))            ;   1 + 1 + 1 + 1
 
          (☯                              ;       B × B
            (~> (==* bool->1+1 bool->1+1) ; (1 + 1) × (1 + 1)
@@ -172,24 +172,24 @@
                (☯ ; n + p × m + p
                  (>- (~>             ; n
                        (-< 1 _)      ; p × m  (p = 1, m = n)
-                       2< factorial)
+                       +1< factorial)
                      (~>                                ;   p × m
                        (==* _ (-< _ (=< (>= 1) (= 0)))) ;   p × m   × (1 + 1)
                        (<<< 3)                          ;   p × m   +  p × m
                        (==+ (-< * (~> 2> sub1)) 1>)     ; p*m × m-1 +  p
-                       2< factorial)
+                       +1< factorial)
                      _ ; p
                      ))))
            factorial)
 
          (let ()
            (define-flow (factorial n)  ; n + p × m + p
-             (>- (~> (-< 1 _) 2< factorial)
+             (>- (~> (-< 1 _) +1< factorial)
                  (~>                                ;   p × m
                    (==* _ (-< _ (=< (>= 1) (= 0)))) ;   p × m   × (1 + 1)
                    (<<< 3)                          ;   p × m   +  p × m
                    (==+ (-< * (~> 2> sub1)) 1>)     ; p*m × m-1 +  p
-                   2< factorial)
+                   +1< factorial)
                  _))
            factorial)
 

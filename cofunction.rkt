@@ -24,27 +24,21 @@
 (struct covalues (thk tag))
 (define covalues-vals (λ (covals) ((covalues-thk covals))))
 
-(define-values (n< 0< 1< 2< 3< 4< 5< 6< 7< 8< 9<)
+(define-values (n< 1< 2< 3< 4< 5< 6< 7< 8< 9<)
   (let ()
     (define (n<: n)
       (define name (string->symbol (format "~a<" n)))
       (procedure-rename
-       (match-lambda*
-         [(list (covalues thk tag0))
-          (define tag (+ tag0 (sub1 n)))
-          (if (natural? tag)
-              (covalues thk tag)
-              (error name "~a isn't a natural number!" tag))]
-         [vals
-          (define tag (sub1 n))
-          (if (natural? tag)
-              (covalues (λ () (list->values vals)) tag)
-              (error name "~a isn't a natural number!" tag))])
+       (λ args
+         (define-values (thk tag)
+           (values (λ () (list->values args)) (sub1 n)))
+         (if (natural? tag)
+             (covalues thk tag)
+             (error name "~a isn't a natural number!" tag)))
        name))
     (values
      (λ (n)
        (case n
-         [(0) 0<]
          [(1) 1<]
          [(2) 2<]
          [(3) 3<]
@@ -55,7 +49,6 @@
          [(8) 8<]
          [(9) 9<]
          [else (n<: n)]))
-     (n<: 0)
      (n<: 1)
      (n<: 2)
      (n<: 3)
@@ -65,6 +58,68 @@
      (n<: 7)
      (n<: 8)
      (n<: 9))))
+
+(define-values (+n<
+                0<
+                +1< +2< +3< +4< +5< +6< +7< +8< +9<
+                -1< -2< -3< -4< -5< -6< -7< -8< -9<)
+  (let ()
+    (define (+n<: n)
+      (define name
+        (string->symbol
+         (format (if (> n 0) "+~a<" "~a<") n)))
+      (procedure-rename
+       (λ args
+         (define-values (thk tag)
+           (match args
+             [(list (covalues thk tag0)) (values thk (+ tag0 n))]
+             [_ (values (λ () (list->values args)) n)]))
+         (if (natural? tag)
+             (covalues thk tag)
+             (error name "~a isn't a natural number!" tag)))
+       name))
+    (values
+     (λ (n)
+       (case n
+         [( 0)  0<]
+         [( 1) +1<]
+         [( 2) +2<]
+         [( 3) +3<]
+         [( 4) +4<]
+         [( 5) +5<]
+         [( 6) +6<]
+         [( 7) +7<]
+         [( 8) +8<]
+         [( 9) +9<]
+         [(-1) -1<]
+         [(-2) -2<]
+         [(-3) -3<]
+         [(-4) -4<]
+         [(-5) -5<]
+         [(-6) -6<]
+         [(-7) -7<]
+         [(-8) -8<]
+         [(-9) -9<]
+         [else (+n<: n)]))
+     (+n<:  0)
+     (+n<:  1)
+     (+n<:  2)
+     (+n<:  3)
+     (+n<:  4)
+     (+n<:  5)
+     (+n<:  6)
+     (+n<:  7)
+     (+n<:  8)
+     (+n<:  9)
+     (+n<: -1)
+     (+n<: -2)
+     (+n<: -3)
+     (+n<: -4)
+     (+n<: -5)
+     (+n<: -6)
+     (+n<: -7)
+     (+n<: -8)
+     (+n<: -9))))
 
 (define f0->f
   (case-lambda

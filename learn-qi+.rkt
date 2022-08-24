@@ -16,7 +16,7 @@ Covalues is just the Values tagged with natural numbers.
 (~> (123) 2<) ; #<covalues>
 (~> (123) 3<) ; #<covalues>
 
-;;; ◁ and ▷
+;;; ◁, ▷ and +n<
 (~> (123) 1< ▷ cdr)     ; 0
 (~> (123) 1< ▷ car (_)) ; 123
 
@@ -26,17 +26,22 @@ Covalues is just the Values tagged with natural numbers.
 (~> (123) 3< ▷ cdr)     ; 2
 (~> (123) 3< ▷ car (_)) ; 123
 
-(~> ((cons (λ () 123) 0)) ◁) ; #<covalues>
-(~> ((cons (λ () 123) 1)) ◁) ; #<covalues>
-(~> ((cons (λ () 123) 2)) ◁) ; #<covalues>
+(~> (123) (n< 6) ▷ cdr)     ; 5
+(~> (123) (n< 6) ▷ car (_)) ; 123
 
-(~> (123) 1< 5< ▷ cdr)      ; 4 = (1 - 1) +  (5 - 1)
-(~> (123) 2< 5< ▷ cdr)      ; 5 = (2 - 1) +  (5 - 1)
-(~> (123) 3< 5< ▷ cdr)      ; 6 = (3 - 1) +  (5 - 1)
+(~> (123) (clos _) (cons 0) ◁) ; #<covalues>
+(~> (123) (clos _) (cons 1) ◁) ; #<covalues>
+(~> (123) (clos _) (cons 2) ◁) ; #<covalues>
 
-(~> (123) 3< (n<  5) ▷ cdr) ; 6 = (3 - 1) +  (5 - 1)
-(~> (123) 3< (n< -1) ▷ cdr) ; 0 = (3 - 1) + (-1 - 1)
-(~> (123) 3< 0< ▷ cdr)      ; 1 = (3 - 1) +  (0 - 1)
+(~> (123) 1< +4< ▷ cdr)      ; 4 = (1 - 1) + 4
+(~> (123) 2< +4< ▷ cdr)      ; 5 = (2 - 1) + 4
+(~> (123) 3< +4< ▷ cdr)      ; 6 = (3 - 1) + 4
+
+(~> (123) 3< (+n<  4) ▷ cdr) ; 6 = (3 - 1) +  4
+(~> (123) 3< (+n< -1) ▷ cdr) ; 1 = (3 - 1) + -1
+(~> (123) 3< (+n<  0) ▷ cdr) ; 2 = (3 - 1) +  0
+(~> (123) 3< -1< ▷ cdr)      ; 1 = (3 - 1) + -1
+(~> (123) 3<  0< ▷ cdr)      ; 2 = (3 - 1) +  0
 
 
 #|
@@ -289,12 +294,12 @@ But if A is 1, it seems that the input should be tagged with 2:
     (☯ ; n + p × m + p
       (>- (~>             ; n
             (-< 1 _)      ; p × m  (p = 1, m = n)
-            2< factorial)
+            +1< factorial)
           (~>                                ;   p × m
             (==* _ (-< _ (=< (>= 1) (= 0)))) ;   p × m   × (1 + 1)
             (<<< 3)                          ;   p × m   +  p × m
             (==+ (-< * (~> 2> sub1)) 1>)     ; p*m × m-1 +  p
-            2< factorial)
+            +1< factorial)
           _ ; p
           ))))
 
@@ -391,6 +396,18 @@ fn = t∘...∘t∘f0
 (~> (123) h (esc (f0->f number->string)) ▽) ; '("123")
 
 ;;; map t : A -> 1 + B to f : 1 + A -> 1 + B
+
+(define f
+  (☯                           ; Int
+    (~> (-< _ (=< (= 0) #t))   ; Int × (1 + 1)
+        (<<< 2)                ; Int + Int
+        (==+ ⏚ _))))           ; 1 + Int
+
+(define g
+  (☯                           ; Int
+    (~> (-< _ (=< (= 100) #t)) ; Int × (1 + 1)
+        (<<< 2)                ; Int + Int
+        (==+ ⏚ _))))           ; 1 + Int
 
 (define h (☯ (~> f (esc (f0->f g)))))
 
@@ -520,7 +537,7 @@ may be more suitable for Qi code.
     (☯
       (~> (-< _ (=< zero? exact-positive-integer?))
           (<<< 2)
-          (==+ ⏚ (~> sub1 (clos num->nat) (cons 0) ◁))))))
+          (==+ ⏚ (~> sub1 num->nat 1<))))))
 (define nat->num
   (let ([nat->num (λ _ (apply nat->num _))])
     (☯ (>- 0 (~> nat->num add1)))))
