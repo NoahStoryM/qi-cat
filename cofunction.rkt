@@ -174,19 +174,25 @@
 ;; composed
 (struct composed (coarity result-coarity f)
   #:property prop:procedure
-  (λ (self . args)
-    (apply (composed-f self) args)))
+  (struct-field-index f))
 (define make-composed
   (λ f*
     (cond
       [(null? f*) values]
       [else
-       (define coarity (procedure-coarity (car f*)))
+       (define f0 (car f*))
+       (define arity (procedure-arity f0))
+       (define coarity (procedure-coarity f0))
        (let ([f* (reverse f*)])
          (define result-coarity
            (procedure-result-coarity (car f*)))
          (define f (apply compose f*))
-         (composed coarity result-coarity f))])))
+         (composed
+          coarity
+          result-coarity
+          (if (arity=? arity (procedure-arity f))
+              f
+              (procedure-reduce-arity f arity))))])))
 
 
 ;; coprocedure
