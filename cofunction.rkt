@@ -116,25 +116,29 @@
      (n<: 8)
      (n<: 9))))
 
+(struct +injection coprocedure (n)
+  #:property prop:procedure
+  (λ (self . args)
+    (define n (+injection-n self))
+    (define name
+      (string->symbol
+       (format (if (> n 0) "+~a<" "~a<") n)))
+    (define-values (thk tag)
+      (match args
+        [(list (covalues thk tag0)) (values thk (+ tag0 n))]
+        [_ (values (λ () (list->values args)) n)]))
+    (if (natural? tag)
+        (covalues thk tag)
+        (error name "~a isn't a natural number!" tag))))
 (define-values (+n<
                 0<
                 +1< +2< +3< +4< +5< +6< +7< +8< +9<
                 -1< -2< -3< -4< -5< -6< -7< -8< -9<)
   (let ()
     (define (+n<: n)
-      (define name
-        (string->symbol
-         (format (if (> n 0) "+~a<" "~a<") n)))
-      (procedure-rename
-       (λ args
-         (define-values (thk tag)
-           (match args
-             [(list (covalues thk tag0)) (values thk (+ tag0 n))]
-             [_ (values (λ () (list->values args)) n)]))
-         (if (natural? tag)
-             (covalues thk tag)
-             (error name "~a isn't a natural number!" tag)))
-       name))
+      (cond
+        [(>= n 0) (+injection 1 (+ 1 n) n)]
+        [(<  n 0) (+injection (- 1 n) 1 n)]))
     (values
      (λ (n)
        (case n

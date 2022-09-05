@@ -53,6 +53,14 @@ Procedures can be regarded as the morphisms between Covalues.
 (procedure-coarity        quotient/remainder) ; 1
 (procedure-result-coarity quotient/remainder) ; 1
 
+(procedure-coarity        (☯ 5<))       ; 1
+(procedure-result-coarity (☯ 5<))       ; 5
+
+(procedure-coarity        (☯ +5<))      ; 1
+(procedure-result-coarity (☯ +5<))      ; 6
+
+(procedure-coarity        (☯ -5<))      ; 6
+(procedure-result-coarity (☯ -5<))      ; 1
 
 #|
 For f : A + B -> V + W and g : C + D -> X + Y, there are
