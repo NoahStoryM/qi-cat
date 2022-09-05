@@ -292,19 +292,19 @@
         (copairing coarity result-coarity fs)])]))
 
 ;; disjoint union -> tag union
-(struct ->N coprocedure (pred*)
+(struct disjoint->tag coprocedure (pred*)
   #:property prop:procedure
   (λ (self . args)
-    (define pred* (->N-pred* self))
+    (define pred* (disjoint->tag-pred* self))
     (when (null? pred*) (error '*->0 "Can't call *->0"))
     (define n (index-where pred* (λ (pred) (apply pred args))))
     (covalues (λ () (values)) n)))
-(define *->0 (->N 1 0 '()))
+(define *->0 (disjoint->tag 1 0 '()))
 (define *->0? (λ (arg) (eq? arg *->0)))
 (define ->N:
   (case-lambda
     [() *->0]
-    [pred* (->N 1 (length pred*) pred*)]))
+    [pred* (disjoint->tag 1 (length pred*) pred*)]))
 
 
 ;; coarity
