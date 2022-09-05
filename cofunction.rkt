@@ -26,18 +26,73 @@
 (struct covalues (thk tag))
 (define covalues-vals (λ (covals) ((covalues-thk covals))))
 
+(define f0->f
+  (case-lambda
+    [(t) (f0->f values t)]
+    [(f0 t)
+     (λ a*
+       (define-values (thk tag)
+         (match a*
+           [(list (covalues thk tag))
+            (values (λ () (call-with-values thk f0)) tag)]
+           [_ (values (λ () (apply f0 a*)) 0)]))
+       (call-with-values thk (apply compose (make-list tag t))))]))
+
+
+#;(begin
+    #| A
+    =  A + 0 + 0 + ... + 0
+    != 0 + 0 + ... + 0 + A
+    |#
+
+    (define make-covalues
+      (λ (thk tag)
+        (if (= 0 tag)
+            (thk)
+            (covalues thk tag))))
+    (define get-covalues-tag
+      (λ (obj)
+        (if (covalues? obj)
+            (covalues-tag obj)
+            0)))
+    (define get-covalues-thk
+      (λ (obj)
+        (if (covalues? obj)
+            (covalues-thk obj)
+            obj))))
+
+
+(define ◁
+  (match-lambda
+    [(cons (? procedure? thk) (? natural? tag))
+     #:when (arity-includes? (procedure-arity thk) 0)
+     (covalues thk tag)]
+    #;[(? procedure? thk)
+       #:when (arity-includes? (procedure-arity thk) 0)
+       (covalues thk 0)]))
+(define ▷
+  (match-lambda
+    [(covalues thk tag) (cons thk tag)]
+    #;[thk (cons thk 0)]))
+
+
+;; coprocedure
+(struct coprocedure (coarity result-coarity))
+
+
+(struct injection coprocedure ()
+  #:property prop:procedure
+  (λ (self . args)
+    (define n (coprocedure-result-coarity self))
+    (define name (string->symbol (format "~a<" n)))
+    (define-values (thk tag)
+      (values (λ () (list->values args)) (sub1 n)))
+    (if (natural? tag)
+        (covalues thk tag)
+        (error name "~a isn't a natural number!" tag))))
 (define-values (n< 1< 2< 3< 4< 5< 6< 7< 8< 9<)
   (let ()
-    (define (n<: n)
-      (define name (string->symbol (format "~a<" n)))
-      (procedure-rename
-       (λ args
-         (define-values (thk tag)
-           (values (λ () (list->values args)) (sub1 n)))
-         (if (natural? tag)
-             (covalues thk tag)
-             (error name "~a isn't a natural number!" tag)))
-       name))
+    (define (n<: n) (injection 1 n))
     (values
      (λ (n)
        (case n
@@ -123,58 +178,6 @@
      (+n<: -8)
      (+n<: -9))))
 
-(define f0->f
-  (case-lambda
-    [(t) (f0->f values t)]
-    [(f0 t)
-     (λ a*
-       (define-values (thk tag)
-         (match a*
-           [(list (covalues thk tag))
-            (values (λ () (call-with-values thk f0)) tag)]
-           [_ (values (λ () (apply f0 a*)) 0)]))
-       (call-with-values thk (apply compose (make-list tag t))))]))
-
-
-#;(begin
-    #| A
-    =  A + 0 + 0 + ... + 0
-    != 0 + 0 + ... + 0 + A
-    |#
-
-    (define make-covalues
-      (λ (thk tag)
-        (if (= 0 tag)
-            (thk)
-            (covalues thk tag))))
-    (define get-covalues-tag
-      (λ (obj)
-        (if (covalues? obj)
-            (covalues-tag obj)
-            0)))
-    (define get-covalues-thk
-      (λ (obj)
-        (if (covalues? obj)
-            (covalues-thk obj)
-            obj))))
-
-
-(define ◁
-  (match-lambda
-    [(cons (? procedure? thk) (? natural? tag))
-     #:when (arity-includes? (procedure-arity thk) 0)
-     (covalues thk tag)]
-    #;[(? procedure? thk)
-       #:when (arity-includes? (procedure-arity thk) 0)
-       (covalues thk 0)]))
-(define ▷
-  (match-lambda
-    [(covalues thk tag) (cons thk tag)]
-    #;[thk (cons thk 0)]))
-
-
-;; coprocedure
-(struct coprocedure (coarity result-coarity))
 
 (struct composed coprocedure (f)
   #:property prop:procedure (struct-field-index f))

@@ -151,7 +151,7 @@ N = 1 + ... + 1
 
 ;;; Differences
 (procedure-coarity        (☯ 2<)) ; 1
-(procedure-result-coarity (☯ 2<)) ; 1
+(procedure-result-coarity (☯ 2<)) ; 2
 
 (procedure-coarity        (☯ (==+ ≂ _ ≂))) ; 1
 (procedure-result-coarity (☯ (==+ ≂ _ ≂))) ; 3
