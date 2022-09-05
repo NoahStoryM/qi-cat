@@ -4,15 +4,17 @@
  racket/list
  racket/match
  racket/function
- (only-in racket/math natural?)
+ racket/math
  syntax/parse/define)
 
 (provide (all-defined-out)
-         (rename-out [identity id]))
+         (rename-out
+          [identity id]
+          [0->* ≂]))
 
 
 ;; utils
-(define (->boolean v) (not (not v)))
+(define (->boolean v) (and v #t))
 (define (true?  arg) (eq? #t arg))
 (define (false? arg) (eq? #f arg))
 (define (list->values ls) (apply values ls))
@@ -171,72 +173,80 @@
     #;[thk (cons thk 0)]))
 
 
-;; composed
-(struct composed (coarity result-coarity f)
-  #:property prop:procedure
-  (struct-field-index f))
-(define make-composed
-  (λ f*
-    (cond
-      [(null? f*) values]
-      [else
-       (define f0 (car f*))
-       (define arity (procedure-arity f0))
-       (define coarity (procedure-coarity f0))
-       (let ([f* (reverse f*)])
-         (define result-coarity
-           (procedure-result-coarity (car f*)))
-         (define f (apply compose f*))
-         (composed
-          coarity
-          result-coarity
-          (if (arity=? arity (procedure-arity f))
-              f
-              (procedure-reduce-arity f arity))))])))
-
-
 ;; coprocedure
-(struct coprocedure (f*)
-  #:property prop:procedure
-  (λ (self . args) (error '≂ "Can't call ≂")))
-(define ≂ (coprocedure '()))
-(define source ≂)
-(define ≂? (λ (arg) (and (coprocedure? arg) (null? (coprocedure-f* arg)))))
-(define source? ≂?)
+(struct coprocedure (coarity result-coarity))
 
-(struct coproducting coprocedure ()
+(struct composed coprocedure (f)
+  #:property prop:procedure (struct-field-index f))
+(define make-composed
+  (case-lambda
+    [() values]
+    [(f0) f0]
+    [(f0 . f*)
+     (let ([f* (reverse (remq* (list values) f*))])
+       (cond
+         [(null? f*) f0]
+         [else
+          (define coarity (procedure-coarity f0))
+          (define result-coarity (procedure-result-coarity (car f*)))
+          (define f (compose (apply compose f*) f0))
+          (composed coarity result-coarity f)]))]))
+
+
+(struct coproducting coprocedure (f*)
   #:property prop:procedure
   (λ (self . args)
-    (define f* (coprocedure-f* self))
-    (when (null? f*) (error '≂ "Can't call ≂"))
+    (define f* (coproducting-f* self))
+    (when (null? f*) (error '0->0 "Can't call 0->0"))
     (define-values (thk coarity)
       (match args
         [(list (covalues thk tag)) (values thk (add1 tag))]
         [_ (values (λ () (list->values args)) 1)]))
     (let loop ([coarity coarity] [tag1 0] [f* f*])
-      (when (null? f*) (error 'call "tag out of bound"))
+      (when (null? f*) (error 'coproducting "tag out of bound"))
       (define f (car f*))
-      (define n (procedure-coarity f))
-      (cond
-        [(≂? f)
-         (loop coarity (add1 tag1) (cdr f*))]
-        [(> coarity n)
-         (loop (- coarity n) (+ tag1 (procedure-result-coarity f)) (cdr f*))]
-        [else
-         (match (values->list
-                 (call-with-values
-                  (if (= n 1)
-                      thk
-                      (λ () (covalues thk (sub1 coarity))))
-                  f))
-           [(list (covalues thk tag)) (covalues thk (+ tag tag1))]
-           [vals (covalues (λ () (list->values vals)) tag1)])]))))
+      (define m (procedure-coarity f))
+      (define n (procedure-result-coarity f))
+      (if (> coarity m)
+          (loop (- coarity m) (+ tag1 n) (cdr f*))
+          (match (values->list
+                  (call-with-values
+                   (if (= m 1)
+                       thk
+                       (λ () (covalues thk (sub1 coarity))))
+                   f))
+            [(list (covalues thk tag)) (covalues thk (+ tag tag1))]
+            [vals (covalues (λ () (list->values vals)) tag1)])))))
+(define 0->0 (coproducting 0 0 '()))
+(define 0->0? (λ (arg) (eq? arg 0->0)))
+(define make-coproducting
+  (case-lambda
+    [() 0->0]
+    [(f0) f0]
+    [f*
+     (define fs
+       (flatten
+        (for/list ([f (in-list f*)])
+          (cond
+            [(eq? 0->0 f) '()]
+            [(coproducting? f) (coproducting-f* f)]
+            [else f]))))
+     (case (length fs)
+       [(0) 0->0]
+       [(1) (car fs)]
+       [else
+        (define-values (coarity result-coarity)
+          (for/fold ([coarity 0] [result-coarity 0])
+                    ([f (in-list fs)])
+            (values (coarity-sum coarity (procedure-coarity f))
+                    (coarity-sum result-coarity (procedure-result-coarity f)))))
+        (coproducting coarity result-coarity fs)])]))
 
-(struct copairing coprocedure ()
+(struct copairing coprocedure (f*)
   #:property prop:procedure
   (λ (self . args)
-    (define f* (coprocedure-f* self))
-    (when (null? f*) (error '≂ "Can't call ≂"))
+    (define f* (copairing-f* self))
+    (when (null? f*) (error '0->* "Can't call 0->*"))
     (define-values (thk coarity)
       (match args
         [(list (covalues thk tag)) (values thk (add1 tag))]
@@ -244,40 +254,59 @@
     (let loop ([coarity coarity] [f* f*])
       (when (null? f*) (error 'call "tag out of bound"))
       (define f (car f*))
-      (define n (procedure-coarity f))
-      (cond
-        [(≂? f) (loop coarity (cdr f*))]
-        [(> coarity n) (loop (- coarity n) (cdr f*))]
-        [else
-         (call-with-values
-          (if (= n 1)
-              thk
-              (λ () (covalues thk (sub1 coarity))))
-          f)]))))
+      (define m (procedure-coarity f))
+      (define n (procedure-result-coarity f))
+      (if (> coarity m)
+          (loop (- coarity m) (cdr f*))
+          (call-with-values
+           (if (= m 1)
+               thk
+               (λ () (covalues thk (sub1 coarity))))
+           f)))))
+(define 0->* (copairing 0 1 '()))
+(define 0->*? (λ (arg) (eq? arg 0->*)))
+(define make-copairing
+  (case-lambda
+    [() 0->*]
+    [(f0) f0]
+    [f*
+     (define fs
+       (flatten
+        (for/list ([f (in-list f*)])
+          (cond
+            [(eq? 0->* f) '()]
+            [(copairing? f) (copairing-f* f)]
+            [else f]))))
+     (case (length fs)
+       [(0) 0->*]
+       [(1) (car fs)]
+       [else
+        (define-values (coarity result-coarity)
+          (for/fold ([coarity 0] [result-coarity 0])
+                    ([f (in-list fs)])
+            (values (coarity-sum   coarity (procedure-coarity f))
+                    (coarity-union result-coarity (procedure-result-coarity f)))))
+        (copairing coarity result-coarity fs)])]))
 
-
-;; (coprocedure)   = ≂
-;; (coprocedure f) = f
-(define-values (make-coproducting make-copairing)
-  (let ()
-    (define (make: pred make)
-      (λ f*
-        (case (length f*)
-          [(0) ≂]
-          [(1) (make (car f*))]
-          [else
-           (make
-               (flatten
-                (for/list ([f (in-list f*)])
-                  (cond
-                    [(≂? f) ≂]
-                    [(pred f) (coprocedure-f* f)]
-                    [else f]))))])))
-    (values (make: coproducting? coproducting)
-            (make: copairing?    copairing))))
+;; disjoint union -> tag union
+(struct ->N coprocedure (pred*)
+  #:property prop:procedure
+  (λ (self . args)
+    (define pred* (->N-pred* self))
+    (when (null? pred*) (error '*->0 "Can't call *->0"))
+    (define n (index-where pred* (λ (pred) (apply pred args))))
+    (covalues (λ () (values)) n)))
+(define *->0 (->N 1 0 '()))
+(define *->0? (λ (arg) (eq? arg *->0)))
+(define ->N:
+  (case-lambda
+    [() *->0]
+    [pred* (->N 1 (length pred*) pred*)]))
 
 
 ;; coarity
+(define coarity-sum   (curry  +  0))
+(define coarity-union (curry max 0))
 #;(begin
     (struct	coarity-at-least (value)
       #:extra-constructor-name make-coarity-at-least)
@@ -315,51 +344,15 @@
 
 (define procedure-coarity
   (λ (f)
-    (cond
-      [(coprocedure? f)
-       (define f* (coprocedure-f* f))
-       (define coarity* (map procedure-coarity f*))
-       (apply + coarity*)]
-      #;[(N->? (length (N->-args f)))]
-      [(composed? f) (composed-coarity f)]
-      [else 1])))
+    (if (coprocedure? f)
+        (coprocedure-coarity f)
+        1)))
 
 (define procedure-result-coarity
   (λ (f)
-    (cond
-      [(≂? f) 1]
-      [(coprocedure? f)
-       (define f* (coprocedure-f* f))
-       (define result-coarity* (map procedure-result-coarity f*))
-       ;; g : X -> A + B
-       ;; h : Y + Z -> C
-       (cond
-         [(coproducting? f)
-          ;; f = g + h : X + Y + Z -> A + B + C
-          (apply + result-coarity*)]
-         [(copairing? f)
-          ;; f = <g | h> : X + Y + Z -> (A + B) ∪ (C + 0)
-          (apply max 0 result-coarity*)])]
-      [(->N? f) (length (->N-preds f))]
-      [(composed? f) (composed-result-coarity f)]
-      [else 1])))
-
-
-;; disjoint union -> tag union
-(struct ->N (preds)
-  #:property prop:procedure
-  (λ (self . args)
-    (define preds (->N-preds self))
-    (define n (index-where preds (λ (pred) (apply pred args))))
-    (covalues (λ () (values)) n)))
-(define ->N: (λ preds (if (null? preds) ≂ (->N preds))))
-
-;; tag union -> disjoint union
-#;(begin
-    (struct N-> (args)
-      #:property prop:procedure
-      (λ (self arg) (list-ref args (covalues-tag arg))))
-    (define N->: (λ args (if (null? args) ≂ (N-> args)))))
+    (if (coprocedure? f)
+        (coprocedure-result-coarity f)
+        1)))
 
 
 ;; distributive law

@@ -19,7 +19,7 @@
          f0->f
          fanin
          ◁ ▷
-         ≂ ≂?
+         ≂
          procedure-coarity
          procedure-result-coarity
          >>> <<<
