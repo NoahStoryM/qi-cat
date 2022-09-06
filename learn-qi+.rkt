@@ -569,7 +569,7 @@ may be more suitable for Qi code.
           (>- (error
                'lookup-variable-value
                "no value found for key\n  key: ~a" _)
-              (~> (-< 1> (group 2 (~> eq? bool->1+1) _)) ; Var × (1 + 1) × (Box Val) × Env
+              (~> (-< 1> (==* (~> eq? bool->1+1) _)) ; Var × (1 + 1) × (Box Val) × Env
                   (<<< 2)
                   (>- (~> (==* id ⏚ id) lookup-variable-value)
                       (~> 2> unbox))))))))

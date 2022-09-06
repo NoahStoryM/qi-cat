@@ -14,3 +14,8 @@
 (define (list->values lst) (apply values lst))
 (define-syntax-parse-rule (values->list body:expr ...+)
   (call-with-values (thunk body ...) list))
+
+(define add (procedure-reduce-arity + 2))
+(define sub (procedure-reduce-arity - 2))
+(define mul (procedure-reduce-arity * 2))
+(define div (procedure-reduce-arity / 2))

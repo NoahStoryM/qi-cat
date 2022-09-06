@@ -16,7 +16,7 @@
 
 ;; covalues
 (struct covalues (lst tag))
-(define covalues-vals (λ (covals) (list->values (covalues-lst covals))))
+(define covalues-vals (λ (covals) (apply values (covalues-lst covals))))
 
 (define f0->f
   (case-lambda
@@ -355,14 +355,14 @@
   (λ (coarity)
     (match-lambda
       [(covalues lst tag)
-       (list->values
-        (list-update
-         lst
-         (sub1 coarity)
-         (match-lambda
-           #;[(covalues lst tag0)
-              (covalues lst (+ tag tag0))]
-           [lst (covalues lst tag)])))])))
+       (apply values
+         (list-update
+          lst
+          (sub1 coarity)
+          (match-lambda
+            #;[(covalues lst tag0)
+               (covalues lst (+ tag tag0))]
+            [lst (covalues lst tag)])))])))
 (define <<<
   (λ (coarity)
     (λ args
@@ -377,7 +377,7 @@
 
 
 ;; higher-order
-(define <>
+(define coamp
   (λ (f)
     (define n (procedure-coarity f))
     (define m (procedure-result-coarity f))
@@ -393,6 +393,5 @@
          [vals
           (covalues lst (* m tag1))])]
       [vals (apply f vals)])))
-(define coamp <>)
 
 (define fanin (λ (n) (apply cotee (make-list n values))))
