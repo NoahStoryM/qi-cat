@@ -189,7 +189,9 @@
           (define coarity (procedure-coarity f0))
           (define result-coarity (procedure-result-coarity (car f*)))
           (define f (compose (apply compose f*) f0))
-          (composed coarity result-coarity f)]))]))
+          (if (= 1 coarity result-coarity)
+              f
+              (composed coarity result-coarity f))]))]))
 
 
 (struct coproducting coprocedure (f*)
