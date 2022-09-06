@@ -153,7 +153,7 @@
        [else
         (define arity* (map procedure-arity fs))
         (define arity (apply arity-sum arity*))
-        (define f
+        (define compiled-relay*-flow
           (λ args
             (define args*
               (for/fold ([a '()] [a* args] #:result (reverse a))
@@ -171,8 +171,8 @@
                     [(2 `(,v0 ,v1)) (f v0 v1)]
                     [(_ _) (apply f args)])))))))
         (if (equal? arity (arity-at-least 0))
-            f
-            (procedure-reduce-arity f arity))])]))
+            compiled-relay*-flow
+            (procedure-reduce-arity compiled-relay*-flow arity))])]))
 
 (define tee
   (case-lambda
@@ -186,18 +186,20 @@
        [else
         (define arity* (map procedure-arity fs))
         (define arity (apply arity-union arity*))
-        (define f
+        (define compiled-tee-flow
           (λ args
             (apply values
               (append*
                (for/list ([f (in-list fs)])
                  (values->list (apply f args)))))))
         (if (equal? arity (arity-at-least 0))
-            f
-            (procedure-reduce-arity f arity))])]))
+            compiled-tee-flow
+            (procedure-reduce-arity compiled-tee-flow arity))])]))
 
 (define amp
   (λ (f)
-    (λ args
-      (apply values
-        (~map f args)))))
+    (define compiled-amp-flow
+      (λ args
+        (apply values
+          (~map f args))))
+    compiled-amp-flow))
