@@ -42,10 +42,10 @@
 
 
 (define-qi-syntax-rule (>-  flo ...)
-  (esc (make-copairing (☯ flo) ...)))
+  (esc (cotee (☯ flo) ...)))
 
 (define-qi-syntax-rule (==+ flo ...)
-  (esc (make-coproducting (☯ flo) ...)))
+  (esc (relay+ (☯ flo) ...)))
 
 
 (define-qi-syntax-rule (<> flo)

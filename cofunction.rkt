@@ -226,7 +226,7 @@
             [vals (covalues vals tag1)])))))
 (define 0->0 (coproducting 0 0 '()))
 (define 0->0? (λ (arg) (eq? arg 0->0)))
-(define make-coproducting
+(define relay+
   (case-lambda
     [() 0->0]
     [(f0) f0]
@@ -270,7 +270,7 @@
               (f (covalues lst (sub1 coarity))))))))
 (define 0->* (copairing 0 1 '()))
 (define 0->*? (λ (arg) (eq? arg 0->*)))
-(define make-copairing
+(define cotee
   (case-lambda
     [() 0->*]
     [(f0) f0]
@@ -405,4 +405,4 @@
       [vals (apply f vals)])))
 (define coamp <>)
 
-(define fanin (λ (n) (apply make-copairing (make-list n values))))
+(define fanin (λ (n) (apply cotee (make-list n values))))
