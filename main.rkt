@@ -1,7 +1,9 @@
 #lang racket/base
 
 (require qi)
-(require "cofunction.rkt")
+(require
+ "utils.rkt"
+ "cofunction.rkt")
 
 (provide bool->1+1
          id add sub mul div
