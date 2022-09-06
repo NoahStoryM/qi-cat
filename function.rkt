@@ -3,7 +3,8 @@
 (require
  racket/list
  racket/match
- racket/function)
+ racket/function
+ racket/math)
 
 (require "utils.rkt")
 
@@ -103,6 +104,38 @@
            '~map (format "needs ~ax values" arity)
            "given" vs)]))
 
+(define arity-sum
+  (case-lambda
+    [() '()]
+    [(a) a]
+    [(a b)
+     (match* (a b)
+       [((? natural?) (? natural?))
+        (+ a b)]
+       [((arity-at-least a) (? natural?))
+        (arity-at-least (+ a b))]
+       [((? natural?) (arity-at-least b))
+        (arity-at-least (+ a b))]
+       [((arity-at-least a) (arity-at-least b))
+        (arity-at-least (+ a b))]
+       [(_ (? null?)) a]
+       [((? null?) _) b]
+       [((? list?) _)
+        (normalize-arity
+         (flatten
+          (for/list ([a (in-list a)])
+            (arity-sum a b))))]
+       [(_ (? list?))
+        (normalize-arity
+         (flatten
+          (for/list ([b (in-list b)])
+            (arity-sum a b))))])]
+    [a* (foldl arity-sum '() a*)]))
+(define arity-union
+  (case-lambda
+    [() '()]
+    [(a) a]
+    [a* (normalize-arity (flatten a*))]))
 
 (define 1->1 (thunk  (values)))
 (define *->1 (thunk* (values)))
@@ -118,22 +151,28 @@
        [(0) 1->1]
        [(1) (car fs)]
        [else
-        (λ args
-          (define args*
-            (for/fold ([a '()] [a* args] #:result (reverse a))
-                      ([i (in-list (split-input (length args) (map procedure-arity fs)))])
-              (define-values (v v*) (split-at a* i))
-              (values (cons v a) v*)))
-          (apply values
-            (append*
-             (for/list ([f (in-list fs)]
-                        [args (in-list args*)])
-               (values->list
-                (match* ((procedure-arity f) args)
-                  [(0 '()) (f)]
-                  [(1 `(,v0)) (f v0)]
-                  [(2 `(,v0 ,v1)) (f v0 v1)]
-                  [(_ _) (apply f args)]))))))])]))
+        (define arity* (map procedure-arity fs))
+        (define arity (apply arity-sum arity*))
+        (define f
+          (λ args
+            (define args*
+              (for/fold ([a '()] [a* args] #:result (reverse a))
+                        ([i (in-list (split-input (length args) arity*))])
+                (define-values (v v*) (split-at a* i))
+                (values (cons v a) v*)))
+            (apply values
+              (append*
+               (for/list ([f (in-list fs)]
+                          [args (in-list args*)])
+                 (values->list
+                  (match* ((procedure-arity f) args)
+                    [(0 '()) (f)]
+                    [(1 `(,v0)) (f v0)]
+                    [(2 `(,v0 ,v1)) (f v0 v1)]
+                    [(_ _) (apply f args)])))))))
+        (if (equal? arity (arity-at-least 0))
+            f
+            (procedure-reduce-arity f arity))])]))
 
 (define tee
   (case-lambda
@@ -145,11 +184,17 @@
        [(0) *->1]
        [(1) (car fs)]
        [else
-        (λ args
-          (apply values
-            (append*
-             (for/list ([f (in-list fs)])
-               (values->list (apply f args))))))])]))
+        (define arity* (map procedure-arity fs))
+        (define arity (apply arity-union arity*))
+        (define f
+          (λ args
+            (apply values
+              (append*
+               (for/list ([f (in-list fs)])
+                 (values->list (apply f args)))))))
+        (if (equal? arity (arity-at-least 0))
+            f
+            (procedure-reduce-arity f arity))])]))
 
 (define amp
   (λ (f)
