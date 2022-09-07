@@ -30,6 +30,18 @@
          >>> <<<
          fanin
 
+         relay* relay+
+         tee    cotee
+         amp    coamp
+         (rename-out
+          [relay* ==*]
+          [relay+ ==+]
+          [tee    -<]
+          [cotee  >-]
+          [amp    ><]
+          [coamp  <>]
+          [->N:   =<])
+
          (all-from-out qi)
          (for-space qi
                     ~>  ~>>
