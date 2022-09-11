@@ -1,6 +1,6 @@
 #lang racket
 
-(require "main.rkt"
+(require qi/sum
          rackunit)
 
 
@@ -78,16 +78,16 @@
          ))])
 
   (define *n* (☯ (~> ¬f (>- 1 2 3 4))))
-  (check-equal? (*n* #f #f) 1)
-  (check-equal? (*n* #f #t) 2)
-  (check-equal? (*n* #t #f) 3)
-  (check-equal? (*n* #t #t) 4)
+  (check-eq? (*n* #f #f) 1)
+  (check-eq? (*n* #f #t) 2)
+  (check-eq? (*n* #t #f) 3)
+  (check-eq? (*n* #t #t) 4)
 
   (define *and* (☯ (~> ¬f (>- #t #f #f #f))))
-  (check-equal? (*and* #f #f) #t)
-  (check-equal? (*and* #f #t) #f)
-  (check-equal? (*and* #t #f) #f)
-  (check-equal? (*and* #t #t) #f))
+  (check-eq? (*and* #f #f) #t)
+  (check-eq? (*and* #f #t) #f)
+  (check-eq? (*and* #t #f) #f)
+  (check-eq? (*and* #t #t) #f))
 
 
 (for ([t
@@ -143,16 +143,16 @@
                (==+ 1> 2>)              ;          real + real
                (fanin 2)))              ;          real ∪ real
          ))])
-  (check-equal? (min  123  123)  123)
-  (check-equal? (min -123  123) -123)
-  (check-equal? (min  123 -123) -123))
+  (check-eq? (min  123  123)  123)
+  (check-eq? (min -123  123) -123)
+  (check-eq? (min  123 -123) -123))
 
 
 (for ([i (in-list '(1 2 3 4))])
-  (check-equal? (~> (i) (n< i) ▷ cdr) (sub1 i))
-  (check-equal? (~> (i) (n< i) ▷ car (_)) i)
-  (check-equal? (~> (1) (n< i) ((f0->f add1) _)) i)
-  (check-equal? (~> ("1") (n< i) (f0->f string->number add1)) i))
+  (check-eq? (~> (i) (n< i) ▷ cdr) (sub1 i))
+  (check-eq? (~> (i) (n< i) ▷ car (_)) i)
+  (check-eq? (~> (1) (n< i) ((f0->f add1) _)) i)
+  (check-eq? (~> ("1") (n< i) (f0->f string->number add1)) i))
 
 
 (for ([factorial
@@ -193,34 +193,34 @@
                  _))
            factorial)
 
-         (☯
-           (~> (let/cc (==* _ _ 1))           ; loop × n × res
-               (if (~> 2> zero?)
-                   3>
-                   (~> (==* _ (-< _ _) _)     ; loop × n × n × res
-                       (==* (-< _ _) sub1 *)  ; loop × loop × (sub1 n) × (* n res)
-                       (_ _ _ _)))))
+         #;(☯
+             (~> (let/cc (==* _ _ 1))           ; loop × n × res
+                 (if (~> 2> zero?)
+                     3>
+                     (~> (==* _ (-< _ _) _)     ; loop × n × n × res
+                         (==* (-< _ _) sub1 *)  ; loop × loop × (sub1 n) × (* n res)
+                         (_ _ _ _)))))
 
-         (☯
-           (~> (let/cc (==* _ _ 1))           ; loop × n × res
-               (==* _ (-< _ (=< zero? #t)) _) ; loop × n × (1 + 1) × res
-               (<<< 3)                        ; loop × n × res + loop × n × res
-               (==+ 3>                        ;            res + (loop loop (sub1 n) (* n res))
-                    (~> (==* _ (-< _ _) _)
-                        (==* (-< _ _) sub1 *)
-                        (_ _ _ _)))
-               (fanin 2)))))])
+         #;(☯
+             (~> (let/cc (==* _ _ 1))           ; loop × n × res
+                 (==* _ (-< _ (=< zero? #t)) _) ; loop × n × (1 + 1) × res
+                 (<<< 3)                        ; loop × n × res + loop × n × res
+                 (==+ 3>                        ;            res + (loop loop (sub1 n) (* n res))
+                      (~> (==* _ (-< _ _) _)
+                          (==* (-< _ _) sub1 *)
+                          (_ _ _ _)))
+                 (fanin 2)))))])
 
-  (check-equal? (factorial 0) 1)
-  (check-equal? (factorial 1) 1)
-  (check-equal? (factorial 2) 2)
-  (check-equal? (factorial 3) 6)
-  (check-equal? (factorial 4) 24)
-  (check-equal? (factorial 5) 120)
-  (check-equal? (factorial 6) 720)
-  (check-equal? (factorial 7) 5040)
-  (check-equal? (factorial 8) 40320)
-  (check-equal? (factorial 9) 362880))
+  (check-eq? (factorial 0) 1)
+  (check-eq? (factorial 1) 1)
+  (check-eq? (factorial 2) 2)
+  (check-eq? (factorial 3) 6)
+  (check-eq? (factorial 4) 24)
+  (check-eq? (factorial 5) 120)
+  (check-eq? (factorial 6) 720)
+  (check-eq? (factorial 7) 5040)
+  (check-eq? (factorial 8) 40320)
+  (check-eq? (factorial 9) 362880))
 
 
 (let ()
@@ -251,9 +251,9 @@
     (check-equal? (~> (100) h maybe->list) '())
     (check-equal? (~> (123) h maybe->list) '(123))
 
-    (check-equal? (~> (0)   h maybe->option) #f)
-    (check-equal? (~> (100) h maybe->option) #f)
-    (check-equal? (~> (123) h maybe->option) 123)
+    (check-eq? (~> (0)   h maybe->option) #f)
+    (check-eq? (~> (100) h maybe->option) #f)
+    (check-eq? (~> (123) h maybe->option) 123)
 
     (check-equal? (~> (0)   h (esc (f0->f number->string)) ▽) '())
     (check-equal? (~> (100) h (esc (f0->f number->string)) ▽) '())
@@ -320,7 +320,7 @@
     (let ([nat->num (λ _ (apply nat->num _))])
       (☯ (>- 0 (~> nat->num add1)))))
 
-  (check-equal? (~> (9) num->nat nat->num) 9))
+  (check-eq? (~> (9) num->nat nat->num) 9))
 
 (let ()
   ;;; Env : 1 + Var × (Box Val) × Env
@@ -332,7 +332,7 @@
   ;; extend-environment : Var × Val × Env -> Env
   (define extend-environment (☯ (~> (==* id box id) 2<)))
 
-  ;; lookup-variable-value : Var × Env
+  ;; lookup-variable-value : Var × Env -> Val
   (define lookup-variable-value
     (let ([lookup-variable-value (λ _ (apply lookup-variable-value _))])
       (☯
@@ -340,22 +340,16 @@
             (>- (error
                  'lookup-variable-value
                  "no value found for key\n  key: ~a" _)
-                (~> (-< 1> (==* (~> eq? bool->1+1) _)) ; Var × (1 + 1) × (Box Val) × Env
+                (~> (-< 1> (group 2 (~> eq? bool->1+1) _)) ; Var × (1 + 1) × (Box Val) × Env
                     (<<< 2)
                     (>- (~> (==* id ⏚ id) lookup-variable-value)
                         (~> 2> unbox))))))))
 
 
-  (check-equal?
-   (~> () empty-environment
-       (-< 'a 0 _) extend-environment
-       (-< 'b 1 _) extend-environment
-       (-< 'b _) lookup-variable-value)
-   1)
+  (define env
+    (~> () empty-environment
+        (-< 'a 0 _) extend-environment
+        (-< 'b 1 _) extend-environment))
 
-  (check-equal?
-   (~> () empty-environment
-       (-< 'a 0 _) extend-environment
-       (-< 'b 1 _) extend-environment
-       (-< 'a _) lookup-variable-value)
-   0))
+  (check-eq? (~> (env) (-< 'a _) lookup-variable-value) 0)
+  (check-eq? (~> (env) (-< 'b _) lookup-variable-value) 1))

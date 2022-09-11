@@ -1,6 +1,6 @@
 #lang info
 
-(define collection "qi+")
-(define deps '("base" "qi-lib"))
+(define collection 'multi)
+(define deps '("base" "qi-lib" "rackunit-lib"))
 (define build-deps '())
-(define clean '("compiled"))
+(define clean '("compiled" "private/compiled"))

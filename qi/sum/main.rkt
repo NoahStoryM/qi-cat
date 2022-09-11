@@ -1,14 +1,13 @@
 #lang racket/base
 
 (require qi)
-(require
- "utils.rkt"
- "function.rkt"
- "cofunction.rkt")
+(require "private/utils.rkt"
+         "private/cofunction.rkt")
 
 (provide bool->1+1
          id add sub mul div
          values->list list->values
+         covalues?
 
          procedure-coarity
          procedure-result-coarity
@@ -30,26 +29,20 @@
          >>> <<<
          fanin
 
-         relay* relay+
-         tee    cotee
-         amp    coamp
+         relay+
+         cotee
+         coamp
          (rename-out
-          [relay* ==*]
           [relay+ ==+]
-          [tee    -<]
           [cotee  >-]
-          [amp    ><]
           [coamp  <>]
           [->N:   =<])
 
          (all-from-out qi)
          (for-space qi
                     ~>  ~>>
-                    ==+ ==*
-                    >-  -<
-                    <>  ><
-                    =<
-                    let/cc let/ec))
+                    ==+ >- <>
+                    =<))
 
 
 (define-qi-syntax-rule (~> flo ...)
@@ -61,29 +54,16 @@
 
 (define-qi-syntax-rule (==+ flo ...)
   (esc (relay+ (☯ flo) ...)))
-(define-qi-syntax-rule (==* flo ...)
-  (esc (relay* (☯ flo) ...)))
 
 (define-qi-syntax-rule (>- flo ...)
   (esc (cotee (☯ flo) ...)))
-(define-qi-syntax-rule (-< flo ...)
-  (esc (tee (☯ flo) ...)))
 
 (define-qi-syntax-rule (<> flo)
   (esc (coamp (☯ flo))))
-(define-qi-syntax-rule (>< flo)
-  (esc (amp (☯ flo))))
 
 
 (define-qi-syntax-rule (=< flo ...)
   (esc (->N: (☯ flo) ...)))
-
-
-(define-qi-syntax-rule (let/cc flo)
-  (esc (λ args (let/cc cc (apply (☯ flo) cc args)))))
-
-(define-qi-syntax-rule (let/ec flo)
-  (esc (λ args (let/ec ec (apply (☯ flo) ec args)))))
 
 
 (define bool->1+1 (☯ (~> (=< false? true?))))

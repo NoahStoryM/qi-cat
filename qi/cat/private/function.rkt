@@ -1,10 +1,9 @@
 #lang racket/base
 
-(require
- racket/list
- racket/match
- racket/function
- racket/math)
+(require racket/list
+         racket/match
+         racket/function
+         racket/math)
 
 (require "utils.rkt")
 

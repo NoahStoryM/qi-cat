@@ -1,15 +1,19 @@
-#+TITLE: qi+
+#+TITLE: qi-cat
 * Table of Contents                                         :TOC_4_gh:noexport:
-- [[#qi][qi+]]
+- [[#libs][Libs]]
 - [[#category-theory-connections][Category Theory Connections]]
 - [[#examples][Examples]]
 
-* qi+
-  qi with covalues.
+* Libs
+  #+begin_src racket
+    (require qi/sum)
+  #+end_src
+  Qi with covalues (sum).
 
   #+begin_src racket
-    (require qi+)
+    (require qi/cat)
   #+end_src
+  A experimental library for studying the connections between Qi and Category Theory.
 
 * Category Theory Connections
   |-----------------------+---------------------------|

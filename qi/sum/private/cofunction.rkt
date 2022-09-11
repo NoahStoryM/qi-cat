@@ -1,10 +1,9 @@
 #lang racket/base
 
-(require
- racket/list
- racket/match
- racket/function
- racket/math)
+(require racket/list
+         racket/match
+         racket/function
+         racket/math)
 
 (require "utils.rkt")
 
@@ -15,7 +14,7 @@
 
 
 ;; covalues
-(struct covalues (lst tag))
+(struct covalues (lst tag) #:transparent)
 (define covalues-vals (λ (covals) (apply values (covalues-lst covals))))
 
 (define f0->f
@@ -361,7 +360,7 @@
          (list-update
           lst
           (sub1 coarity)
-          (match-lambda
+          (match-lambda*
             #;[(covalues lst tag0)
                (covalues lst (+ tag tag0))]
             [lst (covalues lst tag)])))])))
