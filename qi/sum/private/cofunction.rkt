@@ -361,7 +361,7 @@
           lst
           (sub1 coarity)
           (match-lambda*
-            #;[(covalues lst tag0)
+            #;[(list (covalues lst tag0))
                (covalues lst (+ tag tag0))]
             [lst (covalues lst tag)])))])))
 (define <<<
