@@ -180,17 +180,16 @@
   (case-lambda
     [() values]
     [(f0) f0]
-    [(f0 . f*)
-     (let ([f* (reverse (remq* (list values) f*))])
-       (cond
-         [(null? f*) f0]
-         [else
-          (define coarity (procedure-coarity f0))
-          (define result-coarity (procedure-result-coarity (car f*)))
-          (define f (compose (apply compose f*) f0))
-          (if (= 1 coarity result-coarity)
-              f
-              (composed coarity result-coarity f))]))]))
+    [f*
+     (define fs (reverse f*))
+     (define f  (apply compose fs))
+     (define f0 (car f*))
+     (define f1 (car fs))
+     (define coarity (procedure-coarity f0))
+     (define result-coarity (procedure-result-coarity f1))
+     (if (= 1 coarity result-coarity)
+         f
+         (composed coarity result-coarity f))]))
 
 
 (struct coproducting coprocedure (f*)
