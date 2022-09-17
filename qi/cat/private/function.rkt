@@ -136,8 +136,8 @@
     [(a) a]
     [a* (normalize-arity (flatten a*))]))
 
-(define 1->1 (thunk  (values)))
-(define *->1 (thunk* (values)))
+(define 1->1 (global*))
+(define *->1 (const*))
 
 
 (define relay*

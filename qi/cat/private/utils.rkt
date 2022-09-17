@@ -6,19 +6,21 @@
          (all-from-out "../../sum/private/utils.rkt"))
 
 (define const*
-  (case-lambda
-    [()    (thunk* (values))]
-    [(c)   (thunk* c)]
-    [(c d) (thunk* (values c d))]
-    [c*    (thunk* (apply values c*))]))
+  (let ([const* (thunk* (values))])
+    (case-lambda
+      [()    const*]
+      [(c)   (thunk* c)]
+      [(c d) (thunk* (values c d))]
+      [c*    (thunk* (apply values c*))])))
 
 (define global (λ (c) (thunk c)))
 (define global*
-  (case-lambda
-    [()    (thunk (values))]
-    [(c)   (thunk c)]
-    [(c d) (thunk (values c d))]
-    [c*    (thunk (apply values c*))]))
+  (let ([global* (thunk (values))])
+    (case-lambda
+      [()    global*]
+      [(c)   (thunk c)]
+      [(c d) (thunk (values c d))]
+      [c*    (thunk (apply values c*))])))
 
 
 (define (list-update* l . pairs)
