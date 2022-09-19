@@ -353,27 +353,43 @@
 ;; distributive law
 (define >>>
   (λ (coarity)
-    (match-lambda
-      [(covalues lst tag)
-       (apply values
-         (list-update
-          lst
-          (sub1 coarity)
-          (match-lambda*
-            #;[(list (covalues lst tag0))
-               (covalues lst (+ tag tag0))]
-            [lst (covalues lst tag)])))])))
+    (if (<= coarity 0)
+        values                          ; A + 0 -> 1 × A
+        (case-lambda
+          [() (values)]
+          [(arg)
+           (match arg
+             [(covalues lst tag)
+              (apply values
+                (if (> coarity (length lst))
+                    (append lst (list (covalues '() tag)))
+                    (list-update
+                     lst
+                     (sub1 coarity)
+                     (match-lambda*
+                       #;[(list (covalues lst tag0))
+                          (covalues lst (+ tag tag0))]
+                       [lst (covalues lst tag)]))))]
+             [_ arg])]
+          [args (apply values args)]))))
+
 (define <<<
   (λ (coarity)
-    (λ args
-      (define-values (head tail)
-        (split-at args (sub1 coarity)))
-      (match (car tail)
-        [(covalues lst tag)
-         (match (append head lst (cdr tail))
-           #;[(list (covalues lst tag0))
-              (covalues lst (+ tag tag0))]
-           [lst (covalues lst tag)])]))))
+    (if (<= coarity 0)
+        values                          ; 1 × A -> A + 0
+        (case-lambda
+          [() (values)]
+          [args
+           (let ([coarity (min coarity (length args))])
+             (define-values (head tail)
+               (split-at args (sub1 coarity)))
+             (match (car tail)
+               [(covalues lst tag)
+                (match (append head lst (cdr tail))
+                  #;[(list (covalues lst tag0))
+                     (covalues lst (+ tag tag0))]
+                  [lst (covalues lst tag)])]
+               [_ (apply values args)]))]))))
 
 
 ;; higher-order

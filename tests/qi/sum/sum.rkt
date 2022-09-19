@@ -154,6 +154,11 @@
   (check-eq? (~> (1) (n< i) ((f0->f add1) _)) i)
   (check-eq? (~> ("1") (n< i) (f0->f string->number add1)) i))
 
+(for ([i (in-range -8 8)])
+  (check-equal? (~> () 9<) (~> () 9< (>>> i) (<<< i)))
+  (check-equal? (~> () ▽) (~> () (>>> i) (<<< i) ▽))
+  (check-equal? (~> (1 2 3 4) 9<) (~> (1 2 3 4) 9< (>>> i) (<<< i))))
+
 
 (for ([factorial
        (in-list
