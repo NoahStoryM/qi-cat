@@ -22,8 +22,8 @@
   | (~> f g)              | g∘f                       |
   | (==* f g) / (==+ f g) | f×g        / f+g         |
   | (-< f g)  / (>- f g)  | <f,g>       / <f¦g>       |
-  | △        / ◁         | *->product  / *->sum      |
-  | ▽         / ▷         | product->*  / sum->*      |
+  | △        / ▷         | *->product  / sum->*      |
+  | ▽         / ◁         | product->*  / *->sum      |
   | ⏚         / ≂         | *->1        / 0->*        |
   | n>        / n<        | proj_n       / inj_n        |
   | fanout    / fanin     | <id,id,...> / <id¦id¦...> |
