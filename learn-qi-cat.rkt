@@ -200,6 +200,43 @@ N = 1 + ... + 1
        ▽)))
 
 
+;;; Let 2 = 1 + 1.
+(let ()
+  ;;; A + A is isomorphic to 2 × A and A × 2.
+  (define A+A->2×A (☯ (-< (==+ ⏚ ⏚) (>- _ _))))
+  (define 2×A->A+A (☯ (~> (==* (>- (gen 1<) (gen 2<)) _) (_ _))))
+  (check-equal? (~> (123) 1<) (~> (123) 1< A+A->2×A 2×A->A+A))
+  (check-equal? (~> (123) 2<) (~> (123) 2< A+A->2×A 2×A->A+A))
+  (check-equal? (~> () (-< 1< 123) ▽) (~> () (-< 1< 123) 2×A->A+A A+A->2×A ▽))
+  (check-equal? (~> () (-< 2< 123) ▽) (~> () (-< 2< 123) 2×A->A+A A+A->2×A ▽)))
+
+;;; Traditionally, A -> B has been denoted B^A and called
+;;; the exponential object.
+(let ()
+  ;;; A × A is isomorphic to A^2.
+  ;; a1 : A
+  ;; a2 : A
+  ;;  p : 1 + 1 -> A
+  (define (A×A->A^2 a1 a2) (☯ (>- (gen a1) (gen a2))))
+  (define (A^2->A×A p) (~> () (-< (~> 1< p) (~> 2< p))))
+  (check-equal? (~> ('a 'b) A×A->A^2 A^2->A×A ▽) '(a b))
+
+  (define (cons a1 a2) (☯ (>- (gen a1) (gen a2))))
+  (define (car p) (~> () 1< p))
+  (define (cdr p) (~> () 2< p))
+  (check-eq? (car (cons 'a 'b)) 'a)
+  (check-eq? (cdr (cons 'a 'b)) 'b))
+
+#| Laws among sum, product, and exponential objects
+1^A ≅ 1
+A^0 ≅ 1
+A^1 ≅ A
+B^A × C^A ≅ (B × C)^A
+C^(A × B) ≅ (C^B)^A
+C^(A + B) ≅ C^A × C^B
+|#
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; 3. Conditional
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
