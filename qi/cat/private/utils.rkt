@@ -5,14 +5,6 @@
 (provide (all-defined-out)
          (all-from-out "../../sum/private/utils.rkt"))
 
-(define const*
-  (let ([const* (thunk* (values))])
-    (case-lambda
-      [()    const*]
-      [(c)   (thunk* c)]
-      [(c d) (thunk* (values c d))]
-      [c*    (thunk* (apply values c*))])))
-
 (define global (λ (c) (thunk c)))
 (define global*
   (let ([global* (thunk (values))])
