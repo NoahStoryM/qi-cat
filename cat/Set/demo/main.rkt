@@ -334,7 +334,10 @@ Sum Type
      (unless (< i l)
        (raise-range-error 'inj "+" "" i 0 (sub1 l)))
      (define s (list-ref n* i))
-     (ann (λ v* (apply variant v* #:tag i)) (→ ,s ,t))]
+     (ann (if (zero? i)
+              values
+              (λ v* (apply values (tag i) v*)))
+          (→ ,s ,t))]
     [_
      (unless (zero? i)
        (raise-range-error 'inj "+" "" i 0 0))
