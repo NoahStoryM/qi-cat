@@ -210,7 +210,7 @@
     (for/list ([f (in-list (cons f f*))])
       (unless (equal? s (arrow-source f))
         (raise-argument-error '-< (~a s) (unquoted-printing-string (arrow-source f))))
-      t))
+      (arrow-target f)))
   (define t (normalize-type `(× . ,t*)))
   (match (remove* (list (⏚ s)) (cons f f*) arrow=)
     ['()
