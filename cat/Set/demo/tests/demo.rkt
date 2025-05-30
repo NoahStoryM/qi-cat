@@ -36,31 +36,47 @@
   (ann
    (λ (#:tag [n 0] . a*)
      (match* (a* n)
-       [((list a) 0) (variant a a #:tag 0)]
-       [((list  ) 1) (variant     #:tag 1)]))
+       [((list a) 0) (values a a)]
+       [((list  ) 1) (variant #:tag 1)]))
    (→ (+ Any 1) (+ (× Any Any) 1))))
 
 (define g
   (ann
    (λ (#:tag [n 0] . a*)
      (match* (a* n)
-       [((list a0 a1) 0) (variant #:tag 0 a0 a1)]
-       [((list      ) 1) (variant #:tag 0  0  0)]))
+       [((list a0 a1) 0) (values a0 a1)]
+       [((list      ) 1) (values  0  0)]))
    (→ (+ (× Any Any) 1) (× Any Any))))
 
 (define h
   (ann
    (λ (#:tag [n 0] . a*)
      (match* (a* n)
-       [((list a0 a1) 0) (variant #:tag 0 a0)]))
+       [((list a0 a1) 0) a0]))
    (→ (× Any Any) Any)))
+
+(define i
+  (ann
+   (λ (#:tag [n 0] . a*)
+     (match* (a* n)
+       [((list a) 0) (values a a)]
+       [((list  ) 1) (values 0 0)]))
+   (→ (+ Any 1) (× Any Any))))
+
+(define j
+  (ann
+   (λ (#:tag [n 0] . a*)
+     (match* (a* n)
+       [((list a) 0) a]
+       [((list  ) 1) 0]))
+   (→ (+ Any 1) Any)))
 
 (test-case "Arrow tests"
   (check-pred id? a)
   (check-pred id? b)
   (check-pred id? c)
   (check-pred id? d)
-  (check-variant= (f 'a #:tag 0) (variant 'a 'a))
+  (check-variant= (f 'a #:tag 0) (values 'a 'a))
   (check-variant= (f 'a) (variant 'a 'a #:tag 0))
   (check-variant= (f #:tag 1) (variant #:tag 1))
   (check-exn exn:fail:contract? (λ () (∙ f h))))
@@ -88,7 +104,17 @@
   (check-true (arrow= a×b×c (src f×g×h)))
   (check-true (arrow= b×c×d (tgt f×g×h)))
 
-  (check-variant= (f×g×h 1 2 3 4 5) (variant 1 1 2 3 4))
-  (check-variant= (f×g×h 1 2 3 #:tag 1) (variant 1 1 0 0 2))
+  (check-variant= (f×g×h 1 2 3 4 5) (values 1 1 2 3 4))
+  (check-variant= (f×g×h 1 2 3 #:tag 1) (values 1 1 0 0 2))
   (check-variant= (f×g×h 1 2 3 4 #:tag 2) (variant 1 2 3 #:tag 1))
   (check-variant= (f×g×h 1 2 #:tag 3) (variant 0 0 1 #:tag 1)))
+
+(test-case "Pairing tests"
+  (define b×c×d (==× b c d))
+  (define f&i&j (-< f i j))
+
+  (check-true (arrow= a (src f) (src i) (src j) (src f&i&j)))
+  (check-true (arrow= b×c×d (tgt f&i&j)))
+
+  (check-variant= (f&i&j 9) (values 9 9 9 9 9))
+  (check-variant= (f&i&j #:tag 1) (variant 0 0 0 #:tag 1)))

@@ -219,12 +219,38 @@
      #;(⏚ s) f]
     [`(,f) f]
     [f*
+     (define len (length f*))
+     (define p* (map arrow-path f*))
      (define p
        (treelist
-        (λ arg*
-          ;; TODO
-          )))
-     (arrow p s t)]))
+        (λ (#:tag [#;input-tag it 0] . arg*)
+          ;; Check inputs - all functions share same source type
+          (define arity (unsafe-get-arity s it))
+          (unless (= (length arg*) arity)
+            (apply raise-arity-error '-< arity arg*))
+
+          ;; Apply each function to the same input
+          (define #;output-tags ot* (make-vector len))
+          (define res*
+            (for/fold ([res* '()])
+                      ([p (in-list p*)]
+                       [i (in-range len)])
+              (define-variant (#:tag [#;output-tag ot 0] . #;component-result comp-res)
+                (apply apply-path p #:tag it arg*))
+              (vector-set! ot* i ot)
+              (append res* comp-res)))
+          (define #;output-tag ot
+            (ravel-ids ot*
+             (for/vector #:length len ([t (in-list t*)])
+               (get-coarity t))))
+
+          ;; Check output arity
+          (define result-arity (unsafe-get-arity t ot))
+          (unless (= (length res*) result-arity)
+            (apply raise-result-arity-error '-< result-arity #f res*))
+
+          (apply/variant variant #:tag ot res*))))
+     (function p s t)]))
 
 (define (==× . f*)
   (if (member |0| f* arrow=)
