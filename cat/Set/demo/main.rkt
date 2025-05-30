@@ -3,6 +3,7 @@
 (require (for-syntax racket/base syntax/parse)
          "../../demo.rkt"
          racket/case
+         racket/format
          racket/list
          racket/match
          racket/treelist
