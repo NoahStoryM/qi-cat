@@ -189,19 +189,19 @@
 (define (⏚ s) (ann *->1 (→ ,s 1)))
 (define |1| (ann : 1))
 
-(define (proj s n)
+(define (proj s i)
   (match s
     [`(× ,n* ...)
      (define l (length n*))
-     (unless (< n l)
-       (raise-range-error 'proj "×" "" n 0 (sub1 l)))
-     (define t (list-ref n* n))
-     (ann (λ v* (list-ref v* n)) (→ ,s ,t))]
+     (unless (< i l)
+       (raise-range-error 'proj "×" "" i 0 (sub1 l)))
+     (define t (list-ref n* i))
+     (ann (λ v* (list-ref v* i)) (→ ,s ,t))]
     [`(+ ,_ ...)
-     (raise-range-error 'proj "×" "" n 0 -1)]
+     (raise-range-error 'proj "×" "" i 0 -1)]
     [_
-     (unless (zero? n)
-       (raise-range-error 'proj "×" "" n 0 0))
+     (unless (zero? i)
+       (raise-range-error 'proj "×" "" i 0 0))
      (ann : ,s)]))
 
 (define (-< f . f*)
@@ -321,11 +321,24 @@
 Sum Type
 ********************************************************************************
 |#
-(provide ⎓ |0| #;inj #;==+ #;>- #;fanin)
+(provide ⎓ |0| inj #;==+ #;>- #;fanin)
 
 (define 0->* (case-λ))
 (define (⎓ t) (ann 0->* (→ 0 ,t)))
 (define |0| (ann : 0))
+
+(define (inj t i)
+  (match t
+    [`(+ ,n* ...)
+     (define l (length n*))
+     (unless (< i l)
+       (raise-range-error 'inj "+" "" i 0 (sub1 l)))
+     (define s (list-ref n* i))
+     (ann (λ v* (apply variant v* #:tag i)) (→ ,s ,t))]
+    [_
+     (unless (zero? i)
+       (raise-range-error 'inj "+" "" i 0 0))
+     (ann : ,t)]))
 
 ;; *****************************************************************************
 ;; Exponential Type
